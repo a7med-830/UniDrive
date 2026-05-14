@@ -1,5 +1,6 @@
 import AdminLayoutClient from "./AdminLayoutClient";
 import "./admin.css";
+import "./dashboard.css";
 import { auth } from "@/lib/auth";
 
 export const metadata = {

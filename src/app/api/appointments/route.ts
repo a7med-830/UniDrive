@@ -9,7 +9,7 @@ const appointmentSchema = z.object({
   clientEmail: z.string().email().optional().or(z.literal('')),
   scheduledAt: z.string().datetime(), // expects ISO string
   notes:       z.string().optional(),
-  status:      z.enum(["pending", "approved", "completed", "cancelled"]).default("pending"),
+  status:      z.enum(["under reviewing", "confirmed", "completed", "cancelled"]).default("under reviewing"),
 });
 
 export async function GET(req: NextRequest) {
@@ -35,11 +35,6 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session || session.user?.role !== "admin") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   try {
     const body = await req.json();
     const parsed = appointmentSchema.safeParse(body);

@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { z } from "zod";
 
 const updateAppointmentSchema = z.object({
-  status: z.enum(["pending", "approved", "completed", "cancelled"]).optional(),
+  status: z.enum(["under reviewing", "confirmed", "completed", "cancelled"]).optional(),
   notes:  z.string().optional(),
   scheduledAt: z.string().datetime().optional(),
 });

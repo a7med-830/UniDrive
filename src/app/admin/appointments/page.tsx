@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { 
   Search,
   Plus,
@@ -10,11 +11,11 @@ import {
   XCircle,
   Clock,
   CheckCircle2,
-  Filter,
   User,
   Car as CarIcon,
   Activity
 } from "lucide-react";
+import "../cars/cars.css";
 
 type Car = {
   make: string;
@@ -39,7 +40,7 @@ const initialForm = {
   clientEmail: "",
   scheduledAt: "",
   notes: "",
-  status: "pending",
+  status: "under reviewing",
 };
 
 export default function AppointmentsDashboard() {
@@ -162,151 +163,151 @@ export default function AppointmentsDashboard() {
 
   const filteredAppointments = appointments.filter(app => 
     app.clientName.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    app.car?.name.toLowerCase().includes(searchQuery.toLowerCase())
+    (app.car?.name.toLowerCase() || "").includes(searchQuery.toLowerCase())
   );
 
+  const stats = [
+    { label: "Total Tests",  val: appointments.length,                                          icon: CalendarDays,       idx: "01" },
+    { label: "Under Review", val: appointments.filter(a => a.status === "under reviewing").length,     icon: Clock,  idx: "02" },
+    { label: "Confirmed",    val: appointments.filter(a => a.status === "confirmed" || a.status === "completed").length,      icon: CheckCircle2,    idx: "03" },
+    { label: "Cancelled",    val: appointments.filter(a => a.status === "cancelled").length,          icon: XCircle,idx: "04" },
+  ];
+
+  const inp = {
+    background: "var(--inv-card)",
+    border: "1px solid var(--inv-border)",
+    borderRadius: 8,
+    padding: "10px 14px",
+    color: "var(--inv-text)",
+    fontSize: 13,
+    outline: "none",
+    fontFamily: "var(--inv-sans)",
+    width: "100%",
+  } as React.CSSProperties;
+
+  const lbl = {
+    fontSize: 10, fontWeight: 700, color: "var(--inv-dim)",
+    textTransform: "uppercase" as const, letterSpacing: "0.2em",
+  };
+
   return (
-    <div className="w-full pb-20 animate-in fade-in duration-1000">
+    <div className="inv-root">
       
-      {/* Header Info */}
-      <div className="mb-16">
-        <div className="text-[#b8965a] font-bold tracking-[0.4em] text-[10px] mb-4 uppercase">CLIENT SERVICES</div>
-        <h1 className="text-5xl font-serif text-white tracking-wide font-medium">Test Drive Schedules</h1>
+      {/* ── Page Header ── */}
+      <div className="inv-header">
+        <div>
+          <p className="inv-header-eyebrow">Client Services</p>
+          <h1 className="inv-header-title">Test Drive Schedules</h1>
+        </div>
+        <button className="inv-add-btn" onClick={() => handleOpenModal()}>
+          <Plus size={15} />
+          New Booking
+        </button>
       </div>
 
-      {/* Stats Cards Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
-        {[
-          { label: "TOTAL TESTS", val: appointments.length, icon: CalendarDays },
-          { label: "PENDING", val: appointments.filter(a => a.status === "pending").length, icon: Clock },
-          { label: "APPROVED", val: appointments.filter(a => a.status === "approved").length, icon: CheckCircle2 },
-          { label: "CANCELLED", val: appointments.filter(a => a.status === "cancelled").length, icon: XCircle }
-        ].map((stat, i) => (
-          <div key={i} className="bg-[#080808] border border-white/5 p-8 relative group hover:border-[#b8965a]/30 transition-all duration-700">
-            <div className="flex justify-between items-start mb-8">
-              <stat.icon size={20} className="text-[#333] group-hover:text-[#b8965a] transition-colors duration-700" />
-              <div className="text-[10px] font-bold text-[#333] tracking-[0.2em]">{String(i+1).padStart(2, '0')}</div>
+      {/* ── Stat Cards ── */}
+      <div className="inv-stats-grid">
+        {stats.map(s => {
+          const Icon = s.icon;
+          return (
+            <div key={s.label} className="inv-stat-card">
+              <div className="inv-stat-top">
+                <Icon size={20} className="inv-stat-icon" />
+                <span className="inv-stat-idx">{s.idx}</span>
+              </div>
+              <p className="inv-stat-label">{s.label}</p>
+              <p className="inv-stat-value">{s.val}</p>
+              <div className="inv-stat-bar" />
             </div>
-            <p className="text-[#5a5a5a] text-[9px] font-bold uppercase tracking-[0.3em] mb-3">{stat.label}</p>
-            <p className="text-white font-serif text-4xl tracking-tight">{stat.val}</p>
-            <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#b8965a] group-hover:w-full transition-all duration-700"></div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {/* Main Content Area */}
-      <div className="bg-[#080808] border border-white/5 min-w-0">
-        {/* Table Toolbar */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-10 p-10 border-b border-white/5">
-          <div className="flex items-center gap-6">
-             <div className="font-serif text-2xl text-white tracking-wide">Client Ledger</div>
-          </div>
-          
-          <div className="flex items-center gap-6">
-            <div className="admin-toolbar-search relative min-w-0">
-              <Search className="absolute left-0 top-1/2 -translate-y-1/2 text-[#333] group-focus-within:text-[#b8965a] transition-colors" size={16} />
-              <input 
-                type="text" 
-                placeholder="SEARCH CLIENTS..." 
+      {/* ── Appointments Table Card ── */}
+      <div className="inv-table-card">
+        {/* Toolbar */}
+        <div className="inv-toolbar">
+          <span className="inv-toolbar-title">Client Ledger</span>
+          <div className="inv-toolbar-right">
+            <div className="inv-search-wrap">
+              <Search size={14} />
+              <input
+                type="text"
+                placeholder="Search clients..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="admin-toolbar-search-input bg-transparent border-b border-white/10 text-[11px] tracking-[0.16em] text-white pl-10 pr-5 py-3 focus:outline-none focus:border-[#b8965a] transition-all w-72 placeholder:text-[#444]"
+                onChange={e => setSearchQuery(e.target.value)}
+                className="inv-search-input"
               />
             </div>
-            
-            <button
-              onClick={() => handleOpenModal()}
-              className="flex items-center bg-white hover:bg-[#b8965a] hover:text-white text-black px-10 py-4 text-[10px] font-black tracking-[0.2em] transition-all active:scale-95 shrink-0"
-            >
-              <Plus size={14} className="mr-3" />
-              NEW BOOKING
-            </button>
           </div>
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-black text-[#444] border-b border-white/5">
+        <div className="inv-table-wrap">
+          <table className="inv-table">
+            <thead>
               <tr>
-                <th className="px-10 py-8 text-[9px] font-bold uppercase tracking-[0.3em]">Client Information</th>
-                <th className="px-10 py-8 text-[9px] font-bold uppercase tracking-[0.3em]">Vehicle Model</th>
-                <th className="px-10 py-8 text-[9px] font-bold uppercase tracking-[0.3em]">Scheduled Window</th>
-                <th className="px-10 py-8 text-[9px] font-bold uppercase tracking-[0.3em]">Status</th>
-                <th className="px-10 py-8 text-[9px] font-bold uppercase tracking-[0.3em] text-center">Manage</th>
+                <th>Client Information</th>
+                <th>Vehicle Model</th>
+                <th>Scheduled Window</th>
+                <th>Status</th>
+                <th style={{ textAlign: "right" }}>Manage</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody>
               {loading ? (
-                 <tr>
-                    <td colSpan={5} className="px-10 py-32 text-center">
-                       <Activity className="text-[#b8965a] animate-pulse mx-auto mb-6" size={32} />
-                       <p className="text-[#333] font-bold uppercase tracking-[0.4em] text-[9px]">Synchronizing Appointments</p>
-                    </td>
-                 </tr>
+                <tr>
+                  <td colSpan={5} style={{ padding: "80px 0", textAlign: "center" }}>
+                    <Activity className="inv-loading-icon" size={32} style={{ animation: "spin 2s linear infinite", margin: "0 auto 16px", color: "var(--inv-gold)" }} />
+                    <p className="inv-loading-text">Synchronizing Appointments</p>
+                  </td>
+                </tr>
+              ) : filteredAppointments.length === 0 ? (
+                <tr>
+                  <td colSpan={5} style={{ padding: "80px 0", textAlign: "center", color: "var(--inv-muted)" }}>
+                    No appointments found.
+                  </td>
+                </tr>
               ) : filteredAppointments.map((app) => (
-                <tr key={app.id} className="hover:bg-white/[0.01] transition-all duration-500 group">
-                  <td className="px-10 py-10">
-                    <div className="flex items-center gap-10 min-w-0">
-                      <div className="w-14 h-14 bg-black border border-white/5 flex items-center justify-center text-[#333] group-hover:text-[#b8965a] transition-all duration-700 relative">
-                         <User size={24} />
-                         <div className="absolute inset-0 border border-white/0 group-hover:border-[#b8965a]/20 transition-all duration-700"></div>
+                <tr key={app.id}>
+                  <td>
+                    <div className="inv-car-cell">
+                      <div className="inv-car-thumb-ph" style={{ borderRadius: '50%' }}>
+                        <User size={16} />
                       </div>
-                      <div className="min-w-0">
-                        <p className="font-serif text-xl text-white tracking-wide group-hover:text-[#b8965a] transition-colors duration-500">{app.clientName}</p>
-                        <p className="text-[9px] text-[#5a5a5a] font-bold uppercase tracking-[0.3em] mt-2">{app.clientEmail || "NO EMAIL PROVIDED"}</p>
+                      <div className="inv-car-info">
+                        <span className="inv-car-name">{app.clientName}</span>
+                        <span className="inv-car-meta" style={{ marginTop: 2 }}>{app.clientEmail || "NO EMAIL PROVIDED"}</span>
                       </div>
                     </div>
                   </td>
-                  <td className="px-10 py-10">
-                    <div className="flex items-center gap-4">
-                       <CarIcon size={14} className="text-[#333]" />
-                       <span className="text-white text-[11px] font-medium tracking-widest uppercase">
-                          {app.car ? `${app.car.make} ${app.car.model}` : `MODEL ID: #${app.carId}`}
-                       </span>
+                  <td>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <CarIcon size={14} color="var(--inv-dim)" />
+                      <span style={{ fontSize: 13, color: "var(--inv-text)", fontWeight: 500 }}>
+                        {app.car ? `${app.car.make} ${app.car.model}` : `ID: #${app.carId}`}
+                      </span>
                     </div>
                   </td>
-                  <td className="px-10 py-10">
-                    <p className="text-white text-[11px] font-medium tracking-widest uppercase">{new Date(app.scheduledAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</p>
-                    <p className="text-[8px] text-[#333] font-bold uppercase tracking-[0.3em] mt-2">CONFIRMED SLOT</p>
+                  <td>
+                    <p style={{ fontSize: 13, color: "var(--inv-text)", fontWeight: 500 }}>{new Date(app.scheduledAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</p>
+                    <p className="inv-car-meta" style={{ marginTop: 2 }}>CONFIRMED SLOT</p>
                   </td>
-                  <td className="px-10 py-10">
-                    <div className={`inline-flex items-center gap-3 px-0 py-2 text-[9px] font-bold uppercase tracking-[0.25em] ${
-                      app.status === "approved" || app.status === "completed"
-                        ? "text-[#b8965a]" 
-                        : app.status === "pending" 
-                        ? "text-[#888]" 
-                        : "text-[#444]"
-                    }`}>
-                      <div className={`w-1 h-1 rounded-full ${
-                        app.status === "approved" || app.status === "completed" ? "bg-[#b8965a] shadow-[0_0_8px_#b8965a]" 
-                        : "bg-current"
-                      }`} />
+                  <td>
+                    <span className={`inv-badge ${app.status === 'under reviewing' ? 'waiting' : app.status === 'cancelled' ? 'sold' : 'available'}`}>
                       {app.status}
-                    </div>
+                    </span>
                   </td>
-                  <td className="px-10 py-10 text-center">
-                    <div className="flex items-center justify-center gap-6">
-                      {app.status === "pending" && (
+                  <td>
+                    <div className="inv-actions">
+                      {app.status === "under reviewing" && (
                         <button 
-                          onClick={() => updateStatus(app.id, "approved")} 
-                          className="text-[#b8965a] hover:text-white text-[9px] font-black uppercase tracking-widest transition-all p-2"
-                        >
-                          APPROVE
-                        </button>
+                          onClick={() => updateStatus(app.id, "confirmed")}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '10px', color: 'var(--inv-gold)', fontWeight: 'bold', letterSpacing: '0.1em', textTransform: 'uppercase' }}
+                        >Confirm</button>
                       )}
-                      <button 
-                        onClick={() => handleOpenModal(app)}
-                        className="text-[#333] hover:text-white transition-colors p-2"
-                      >
-                        <Pencil size={16} />
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(app.id)}
-                        className="text-[#333] hover:text-[#b8965a] transition-colors p-2"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      <button className="inv-action-btn" onClick={() => handleOpenModal(app)}><Pencil size={14} /></button>
+                      <button className="inv-action-btn" onClick={() => handleDelete(app.id)}><Trash2 size={14} /></button>
                     </div>
                   </td>
                 </tr>
@@ -316,72 +317,86 @@ export default function AppointmentsDashboard() {
         </div>
       </div>
 
-      {/* Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black/95 flex items-center justify-center p-4 z-[100] animate-in fade-in duration-500">
-          <div className="bg-black border border-white/10 w-full max-w-lg shadow-[0_0_100px_rgba(184,150,90,0.05)]">
-            <div className="p-12 border-b border-white/5 flex justify-between items-end">
+      {/* ── Modal ── */}
+      {isModalOpen && typeof document !== 'undefined' && createPortal(
+        <div className="inv-modal-overlay">
+          <div className="inv-modal-panel" style={{ maxWidth: '600px' }}>
+            <div className="inv-modal-head">
               <div>
-                <div className="text-[#b8965a] font-bold tracking-[0.4em] text-[8px] mb-4 uppercase">CLIENT RELATIONSHIP</div>
-                <h2 className="text-3xl font-serif text-white tracking-wide">
+                <p className="inv-modal-eyebrow">Client Relationship</p>
+                <h2 className="inv-modal-title">
                   {editingId ? "Update Booking" : "Register Booking"}
                 </h2>
               </div>
-              <button onClick={handleCloseModal} className="text-[#444] hover:text-white transition-all pb-1">
-                <XCircle size={20} />
+              <button className="inv-modal-close" onClick={handleCloseModal}>
+                <XCircle size={22} />
               </button>
             </div>
-            
-            <form onSubmit={handleSubmit} className="p-12 space-y-10">
-              {!editingId && (
-                <div className="space-y-8">
-                  <div className="space-y-3">
-                    <label className="text-[9px] font-bold text-[#444] uppercase tracking-[0.3em] pl-1">Target Asset ID</label>
-                    <input type="number" required value={formData.carId} onChange={(e) => setFormData({ ...formData, carId: e.target.value })} className="w-full !bg-transparent !border-white/10 !border-0 !border-b !rounded-none px-0 py-3 text-[11px] focus:!border-[#b8965a] text-white tracking-widest" />
-                  </div>
-                  <div className="space-y-3">
-                    <label className="text-[9px] font-bold text-[#444] uppercase tracking-[0.3em] pl-1">Client Full Name</label>
-                    <input type="text" required value={formData.clientName} onChange={(e) => setFormData({ ...formData, clientName: e.target.value })} className="w-full !bg-transparent !border-white/10 !border-0 !border-b !rounded-none px-0 py-3 text-[11px] focus:!border-[#b8965a] text-white tracking-widest" />
-                  </div>
-                  <div className="space-y-3">
-                    <label className="text-[9px] font-bold text-[#444] uppercase tracking-[0.3em] pl-1">Contact Email</label>
-                    <input type="email" value={formData.clientEmail} onChange={(e) => setFormData({ ...formData, clientEmail: e.target.value })} className="w-full !bg-transparent !border-white/10 !border-0 !border-b !rounded-none px-0 py-3 text-[11px] focus:!border-[#b8965a] text-white tracking-widest placeholder:text-[#222]" placeholder="CLIENT@EXAMPLE.COM" />
-                  </div>
+
+            <form onSubmit={handleSubmit} className="inv-modal-form">
+              <div className="inv-form-grid">
+                
+                {!editingId && (
+                  <>
+                    <div className="inv-field inv-field--full">
+                      <label style={lbl}>Target Asset ID</label>
+                      <input type="number" required style={inp}
+                        value={formData.carId}
+                        onChange={e => setFormData({ ...formData, carId: e.target.value })} />
+                    </div>
+                    <div className="inv-field">
+                      <label style={lbl}>Client Full Name</label>
+                      <input type="text" required style={inp}
+                        value={formData.clientName}
+                        onChange={e => setFormData({ ...formData, clientName: e.target.value })} />
+                    </div>
+                    <div className="inv-field">
+                      <label style={lbl}>Contact Email</label>
+                      <input type="email" style={inp} placeholder="CLIENT@EXAMPLE.COM"
+                        value={formData.clientEmail}
+                        onChange={e => setFormData({ ...formData, clientEmail: e.target.value })} />
+                    </div>
+                  </>
+                )}
+
+                <div className="inv-field">
+                  <label style={lbl}>Scheduled Window</label>
+                  <input type="datetime-local" required style={{...inp, colorScheme: 'dark'}}
+                    value={formData.scheduledAt}
+                    onChange={e => setFormData({ ...formData, scheduledAt: e.target.value })} />
                 </div>
-              )}
 
-              <div className="space-y-3">
-                <label className="text-[9px] font-bold text-[#444] uppercase tracking-[0.3em] pl-1">Scheduled Window</label>
-                <input type="datetime-local" required value={formData.scheduledAt} onChange={(e) => setFormData({ ...formData, scheduledAt: e.target.value })} className="w-full !bg-transparent !border-white/10 !border-0 !border-b !rounded-none px-0 py-3 text-[11px] focus:!border-[#b8965a] text-white [color-scheme:dark]" />
+                <div className="inv-field">
+                  <label style={lbl}>Relationship Status</label>
+                  <select style={inp}
+                    value={formData.status}
+                    onChange={e => setFormData({ ...formData, status: e.target.value })}>
+                    <option value="under reviewing" style={{ background: "#18181f" }}>Under Reviewing</option>
+                    <option value="confirmed" style={{ background: "#18181f" }}>Confirmed</option>
+                    <option value="completed" style={{ background: "#18181f" }}>Completed</option>
+                    <option value="cancelled" style={{ background: "#18181f" }}>Cancelled</option>
+                  </select>
+                </div>
+
+                <div className="inv-field inv-field--full">
+                  <label style={lbl}>Internal Notes</label>
+                  <textarea rows={3} style={{ ...inp, resize: "vertical" }}
+                    value={formData.notes}
+                    onChange={e => setFormData({ ...formData, notes: e.target.value })} />
+                </div>
+
               </div>
 
-              <div className="space-y-3">
-                <label className="text-[9px] font-bold text-[#444] uppercase tracking-[0.3em] pl-1">Relationship Status</label>
-                <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className="w-full !bg-transparent !border-white/10 !border-0 !border-b !rounded-none px-0 py-3 text-[11px] focus:!border-[#b8965a] text-white tracking-widest uppercase">
-                  <option value="pending" className="bg-black">Pending Review</option>
-                  <option value="approved" className="bg-black">Approved</option>
-                  <option value="completed" className="bg-black">Completed</option>
-                  <option value="cancelled" className="bg-black">Cancelled</option>
-                </select>
-              </div>
-
-              <div className="space-y-3">
-                <label className="text-[9px] font-bold text-[#444] uppercase tracking-[0.3em] pl-1">Internal Notes</label>
-                <textarea rows={3} value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} className="w-full !bg-transparent !border-white/10 !border-0 !border-b !rounded-none px-0 py-3 text-[11px] focus:!border-[#b8965a] text-white tracking-widest" />
-              </div>
-
-              <div className="pt-12 flex justify-end gap-10">
-                <button type="button" onClick={handleCloseModal} className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#333] hover:text-white transition-all">
-                  DISCARD
-                </button>
-                <button type="submit" className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#b8965a] hover:text-white transition-all">
-                  {editingId ? "COMMIT UPDATES" : "REGISTER BOOKING"}
+              <div className="inv-modal-footer" style={{ marginTop: '30px' }}>
+                <button type="button" className="inv-btn-cancel" onClick={handleCloseModal}>Discard</button>
+                <button type="submit" className="inv-btn-submit">
+                  {editingId ? "Commit Updates" : "Register Booking"}
                 </button>
               </div>
             </form>
           </div>
         </div>
-      )}
+      , document.body)}
     </div>
   );
 }

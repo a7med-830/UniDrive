@@ -1,0 +1,287 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   ADMIN SIDEBAR  –  Standalone Vanilla CSS
+   Matches FoCar layout while keeping UniDrive gold/black aesthetic
+───────────────────────────────────────────────────────────────────────────── */
+
+/* ── Shell ────────────────────────────────────────────────────────────────── */
+.sb-shell {
+  display: flex;
+  height: 100vh;
+  overflow: hidden; /* clips the outer shell only */
+  background: #000000;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Sidebar ──────────────────────────────────────────────────────────────── */
+.sb-sidebar {
+  width: 240px;
+  min-width: 240px;
+  background: #08080a;
+  border-right: 1px solid rgba(255,255,255,0.07);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  z-index: 30;
+  flex-shrink: 0;
+}
+
+/* ── Logo ─────────────────────────────────────────────────────────────────── */
+.sb-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 20px 22px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  text-decoration: none;
+  transition: opacity 0.2s;
+  position: relative;
+}
+
+.sb-logo::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 0; height: 1px;
+  background: #b8965a;
+  transition: width 0.4s ease;
+}
+
+.sb-logo:hover::after { width: 60%; }
+.sb-logo:hover { opacity: 1; }
+
+.sb-logo-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.sb-logo-wordmark {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: 0.22em;
+  line-height: 1;
+  transition: color 0.25s;
+}
+
+.sb-logo:hover .sb-logo-wordmark {
+  color: #b8965a;
+}
+
+.sb-logo-tagline {
+  font-family: 'Inter', sans-serif;
+  font-size: 7px;
+  font-weight: 400;
+  color: #4a4a5a;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+/* ── Nav ──────────────────────────────────────────────────────────────────── */
+.sb-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 12px;
+  margin-bottom: 15px;
+}
+
+.sb-nav--main { flex: 1; overflow-y: auto; }
+.sb-nav--bottom { padding-bottom: 0; }
+
+/* scrollbar */
+.sb-nav--main::-webkit-scrollbar { width: 3px; }
+.sb-nav--main::-webkit-scrollbar-track { background: transparent; }
+.sb-nav--main::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 10px; }
+
+/* ── Nav Links ────────────────────────────────────────────────────────────── */
+.sb-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: #8a8a9a;
+  transition: background 0.2s, color 0.2s;
+  gap: 8px;
+}
+
+.sb-link:hover {
+  background: rgba(255,255,255,0.05);
+  color: #ffffff;
+}
+
+.sb-link--active {
+  background: rgba(184,150,90,0.12);
+  color: #ffffff;
+}
+
+.sb-link-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.sb-link-icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.sb-link--active .sb-link-icon { color: #b8965a; }
+
+.sb-link-text {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Badge */
+.sb-badge {
+  background: #b8965a;
+  color: #000;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  flex-shrink: 0;
+}
+
+/* Active dot */
+.sb-active-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #b8965a;
+  box-shadow: 0 0 8px rgba(184,150,90,0.6);
+  flex-shrink: 0;
+}
+
+/* ── Divider ──────────────────────────────────────────────────────────────── */
+.sb-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+  margin: 0 12px;
+}
+
+/* ── User Footer ──────────────────────────────────────────────────────────── */
+.sb-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  background: rgba(0,0,0,0.2);
+}
+
+.sb-user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #b8965a, #8b6a3a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
+  flex-shrink: 0;
+  border: 2px solid rgba(184,150,90,0.3);
+}
+
+.sb-user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.sb-user-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sb-user-role {
+  font-size: 10px;
+  color: #5a5a6a;
+  margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.sb-signout {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #5a5a6a;
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s, background 0.2s;
+  flex-shrink: 0;
+}
+
+.sb-signout:hover {
+  color: #b8965a;
+  background: rgba(184,150,90,0.1);
+}
+
+/* ── Content Area ─────────────────────────────────────────────────────────── */
+.sb-content {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;      /* critical: lets flex child shrink below content size */
+  overflow-y: auto;   /* THE scroll container for all admin pages */
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.sb-content::-webkit-scrollbar { width: 4px; }
+.sb-content::-webkit-scrollbar-track { background: transparent; }
+.sb-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+.sb-content::-webkit-scrollbar-thumb:hover { background: #b8965a; }
+
+/* ── Override any admin-root button minimums ──────────────────────────────── */
+.admin-root button,
+.admin-root a {
+  min-height: unset;
+  min-width: unset;
+}
+
+@media (max-width: 768px) {
+  .admin-root button,
+  .admin-root a {
+    min-height: unset !important;
+    min-width: unset !important;
+  }
+
+  .sb-sidebar {
+    width: 200px;
+    min-width: 200px;
+  }
+
+  .sb-logo-text { font-size: 17px; }
+  .sb-link-text { font-size: 12px; }
+}

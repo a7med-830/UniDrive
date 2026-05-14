@@ -306,9 +306,6 @@ function Header() {
             <div style={{ fontFamily: "var(--font-display)", fontSize: 18, letterSpacing: "0.22em", color: "var(--white)", fontWeight: 600 }}>
               UNIDRIVE
             </div>
-            <div style={{ fontSize: 7, letterSpacing: "0.35em", color: "var(--text-dim)", marginTop: 2, fontWeight: 400 }}>
-              INDIVIDUALIZATION
-            </div>
           </div>
 
           {/* RIGHT NAV + ICONS */}

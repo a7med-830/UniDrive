@@ -1,0 +1,176 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   ADMIN LOGIN PAGE  –  Standalone Vanilla CSS
+   Matches UniDrive gold/black aesthetic
+───────────────────────────────────────────────────────────────────────────── */
+
+.login-root {
+  --lg-bg:        #000000;
+  --lg-surface:   #08080a;
+  --lg-card:      #18181f;
+  --lg-border:    rgba(255, 255, 255, 0.07);
+  --lg-border-hi: rgba(184, 150, 90, 0.4);
+  --lg-text:      #ffffff;
+  --lg-muted:     #8a8a9a;
+  --lg-dim:       #4a4a5a;
+  --lg-gold:      #b8965a;
+  --lg-red:       #ef4444;
+  --lg-serif:     'Cormorant Garamond', serif;
+  --lg-sans:      'Inter', sans-serif;
+  --lg-radius:    12px;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--lg-bg);
+  font-family: var(--lg-sans);
+  color: var(--lg-text);
+  padding: 24px;
+}
+
+.login-panel {
+  background: var(--lg-surface);
+  border: 1px solid var(--lg-border);
+  border-radius: var(--lg-radius);
+  width: 100%;
+  max-width: 440px;
+  padding: 40px 48px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  animation: loginFadeUp 0.6s ease both;
+}
+
+@keyframes loginFadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+.login-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 40px;
+  position: relative;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--lg-border);
+}
+
+.login-header::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 1px;
+  background: var(--lg-gold);
+}
+
+.login-wordmark {
+  font-family: var(--lg-serif);
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--lg-text);
+  letter-spacing: 0.22em;
+  line-height: 1;
+}
+
+.login-tagline {
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--lg-muted);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+/* ── Error Message ────────────────────────────────────────────────────────── */
+.login-error {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: var(--lg-red);
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+/* ── Form ─────────────────────────────────────────────────────────────────── */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.login-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--lg-muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.login-input {
+  background: var(--lg-card);
+  border: 1px solid var(--lg-border);
+  color: var(--lg-text);
+  font-family: var(--lg-sans);
+  font-size: 14px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.login-input:focus {
+  border-color: var(--lg-border-hi);
+  background: rgba(0,0,0,0.2);
+}
+
+.login-input::placeholder {
+  color: var(--lg-dim);
+}
+
+/* ── Submit Button ────────────────────────────────────────────────────────── */
+.login-btn {
+  margin-top: 12px;
+  padding: 14px 24px;
+  background: var(--lg-gold);
+  color: #000000;
+  border: none;
+  border-radius: 8px;
+  font-family: var(--lg-sans);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.login-btn:hover {
+  opacity: 0.9;
+}
+
+.login-btn:active {
+  transform: scale(0.98);
+}
+
+.login-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 480px) {
+  .login-panel {
+    padding: 32px 24px;
+  }
+}

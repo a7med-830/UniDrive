@@ -1,0 +1,910 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   ADMIN DASHBOARD  –  Standalone Vanilla CSS
+   Keeps UniDrive's gold / black aesthetic while matching the FoCar layout
+───────────────────────────────────────────────────────────────────────────── */
+
+/* ── Tokens ─────────────────────────────────────────────────────────────── */
+.dash-root {
+  --d-bg:        #000000;
+  --d-surface:   #08080a;
+  --d-card:      #18181f;
+  --d-border:    rgba(255, 255, 255, 0.07);
+  --d-border-hi: rgba(184, 150, 90, 0.35);
+  --d-text:      #ffffff;
+  --d-muted:     #8a8a9a;
+  --d-dim:       #4a4a5a;
+  --d-gold:      #b8965a;
+  --d-gold-glow: rgba(184, 150, 90, 0.18);
+  --d-green:     #22c55e;
+  --d-red:       #ef4444;
+  --d-serif:     'Cormorant Garamond', serif;
+  --d-sans:      'Inter', sans-serif;
+  --d-radius:    12px;
+  --d-radius-sm: 8px;
+}
+
+/* ── Shell ──────────────────────────────────────────────────────────────── */
+.dash-root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  /* no height:100% — sb-content is the scroller */
+  font-family: var(--d-sans);
+  color: var(--d-text);
+  background: var(--d-bg);
+  animation: dashFadeIn 0.6s ease both;
+}
+
+@keyframes dashFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Top Navbar ─────────────────────────────────────────────────────────── */
+.dash-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 28px;
+  border-bottom: 1px solid var(--d-border);
+  background: var(--d-surface);
+  flex-shrink: 0;
+  gap: 16px;
+}
+
+.dash-navbar-title {
+  font-family: var(--d-serif);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--d-text);
+  white-space: nowrap;
+}
+
+.dash-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--d-card);
+  border: 1px solid var(--d-border);
+  border-radius: 50px;
+  padding: 8px 18px;
+  flex: 1;
+  max-width: 340px;
+}
+
+.dash-search-wrap svg {
+  color: var(--d-muted);
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.dash-search-wrap input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--d-text);
+  font-size: 12px;
+  font-family: var(--d-sans);
+  letter-spacing: 0.04em;
+  width: 100%;
+}
+
+.dash-search-wrap input::placeholder {
+  color: var(--d-dim);
+}
+
+.dash-navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dash-icon-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--d-card);
+  border: 1px solid var(--d-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--d-muted);
+  transition: border-color 0.25s, color 0.25s;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.dash-icon-btn:hover {
+  border-color: var(--d-gold);
+  color: var(--d-gold);
+}
+
+.dash-icon-btn .dash-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--d-gold);
+  color: #000;
+  font-size: 9px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dash-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--d-gold), #8b6a3a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--d-serif);
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
+  cursor: pointer;
+  border: 2px solid var(--d-border);
+  flex-shrink: 0;
+}
+
+/* ── Scrollable Body ────────────────────────────────────────────────────── */
+.dash-body {
+  /* no overflow-y here — sb-content scrolls */
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  flex: 1;
+}
+
+/* ── Top Row: Stat Cards + Recent Listing ───────────────────────────────── */
+.dash-top-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.3fr;
+  gap: 18px;
+  align-items: stretch;
+}
+
+/* ── Stat Card (Profit / Sales) ─────────────────────────────────────────── */
+.dash-stat-card {
+  background: var(--d-surface);
+  border: 1px solid var(--d-border);
+  border-radius: var(--d-radius);
+  padding: 22px 24px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+
+.dash-stat-card:hover {
+  border-color: var(--d-border-hi);
+}
+
+.dash-stat-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.dash-stat-card-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--d-muted);
+  letter-spacing: 0.03em;
+}
+
+.dash-stat-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dash-pct-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--d-green);
+  border-radius: 50px;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.dash-pct-badge.neg {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--d-red);
+}
+
+.dash-stat-card-more {
+  color: var(--d-dim);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+.dash-stat-value {
+  font-family: var(--d-serif);
+  font-size: 34px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--d-text);
+  line-height: 1;
+}
+
+.dash-stat-sub {
+  font-size: 11px;
+  color: var(--d-muted);
+  margin-top: 4px;
+}
+
+/* Sparkline SVG */
+.dash-sparkline {
+  width: 100%;
+  height: 54px;
+  margin-top: 10px;
+  overflow: visible;
+}
+
+/* ── Recent Car Listing Card ────────────────────────────────────────────── */
+.dash-listing-card {
+  background: var(--d-surface);
+  border: 1px solid var(--d-border);
+  border-radius: var(--d-radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.3s;
+}
+
+.dash-listing-card:hover {
+  border-color: var(--d-border-hi);
+}
+
+.dash-listing-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 20px 14px;
+}
+
+.dash-listing-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--d-text);
+  letter-spacing: 0.02em;
+}
+
+.dash-listing-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.dash-nav-arrow {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--d-card);
+  border: 1px solid var(--d-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--d-muted);
+  transition: all 0.2s;
+  font-size: 14px;
+}
+
+.dash-nav-arrow:hover,
+.dash-nav-arrow.active {
+  background: var(--d-gold);
+  color: #000;
+  border-color: var(--d-gold);
+}
+
+.dash-car-image-wrap {
+  position: relative;
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+  background: radial-gradient(ellipse at center, #1a1a2a 0%, var(--d-card) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dash-car-image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.dash-listing-card:hover .dash-car-image-wrap img {
+  transform: scale(1.04);
+}
+
+.dash-car-image-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--d-dim);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.dash-car-name-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 8px 14px;
+  background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+  font-family: var(--d-serif);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.12);
+  text-transform: uppercase;
+}
+
+.dash-car-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--d-border);
+}
+
+.dash-feature-cell {
+  padding: 13px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  border-right: 1px solid var(--d-border);
+  border-bottom: 1px solid var(--d-border);
+  text-align: center;
+  transition: background 0.2s;
+  cursor: default;
+}
+
+.dash-feature-cell:hover {
+  background: var(--d-card);
+}
+
+.dash-feature-cell:nth-child(3n) {
+  border-right: none;
+}
+
+.dash-feature-cell:nth-child(n+4) {
+  border-bottom: none;
+}
+
+.dash-feature-cell svg {
+  color: var(--d-muted);
+  width: 20px;
+  height: 20px;
+}
+
+.dash-feature-label {
+  font-size: 10px;
+  color: var(--d-muted);
+  letter-spacing: 0.03em;
+}
+
+/* ── Middle Row: Sales Stats + Map ──────────────────────────────────────── */
+.dash-mid-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+
+.dash-sales-card {
+  background: var(--d-surface);
+  border: 1px solid var(--d-border);
+  border-radius: var(--d-radius);
+  padding: 22px 24px;
+  transition: border-color 0.3s;
+}
+
+.dash-sales-card:hover {
+  border-color: var(--d-border-hi);
+}
+
+.dash-sales-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.dash-sales-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--d-text);
+}
+
+.dash-period-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.dash-period-tab {
+  padding: 5px 14px;
+  border-radius: 50px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--d-muted);
+  font-family: var(--d-sans);
+  transition: all 0.2s;
+}
+
+.dash-period-tab:hover {
+  color: var(--d-text);
+}
+
+.dash-period-tab.active {
+  background: var(--d-gold);
+  color: #000;
+  font-weight: 700;
+}
+
+.dash-country-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.dash-country-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--d-muted);
+}
+
+.dash-country-flag {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.dash-country-pct {
+  font-weight: 600;
+  color: var(--d-text);
+}
+
+/* World Map SVG placeholder */
+.dash-map-wrap {
+  width: 100%;
+  height: 180px;
+  border-radius: var(--d-radius-sm);
+  background: var(--d-card);
+  border: 1px solid var(--d-border);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dash-map-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.4;
+}
+
+.dash-map-dots {
+  position: absolute;
+  inset: 0;
+}
+
+.dash-map-dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--d-gold);
+  box-shadow: 0 0 12px var(--d-gold-glow);
+  animation: mapPulse 2s ease-in-out infinite;
+}
+
+.dash-map-dot::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: var(--d-gold);
+  opacity: 0.2;
+  animation: mapRipple 2s ease-in-out infinite;
+}
+
+@keyframes mapPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.15); opacity: 0.85; }
+}
+
+@keyframes mapRipple {
+  0%   { transform: scale(1); opacity: 0.3; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+/* ── Table Card (Top Selling Cars) ──────────────────────────────────────── */
+.dash-table-card {
+  background: var(--d-surface);
+  border: 1px solid var(--d-border);
+  border-radius: var(--d-radius);
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+
+.dash-table-card:hover {
+  border-color: var(--d-border-hi);
+}
+
+.dash-table-card-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--d-border);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dash-table-card-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dash-table-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--d-text);
+}
+
+.dash-table-card-sub {
+  font-size: 11px;
+  color: var(--d-muted);
+}
+
+.dash-view-all-btn {
+  padding: 8px 20px;
+  background: var(--d-card);
+  border: 1px solid var(--d-border);
+  border-radius: var(--d-radius-sm);
+  color: var(--d-text);
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--d-sans);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.dash-view-all-btn:hover {
+  background: var(--d-gold);
+  color: #000;
+  border-color: var(--d-gold);
+}
+
+/* Table */
+.dash-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.dash-table thead tr {
+  border-bottom: 1px solid var(--d-border);
+}
+
+.dash-table thead th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--d-dim);
+  white-space: nowrap;
+}
+
+.dash-table tbody tr {
+  border-bottom: 1px solid var(--d-border);
+  transition: background 0.2s;
+}
+
+.dash-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.dash-table tbody tr:hover {
+  background: var(--d-card);
+}
+
+.dash-table tbody td {
+  padding: 14px 16px;
+  color: var(--d-text);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* Car model cell */
+.dash-car-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dash-car-thumb {
+  width: 52px;
+  height: 36px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: var(--d-card);
+  border: 1px solid var(--d-border);
+  flex-shrink: 0;
+}
+
+.dash-car-thumb-placeholder {
+  width: 52px;
+  height: 36px;
+  border-radius: 6px;
+  background: var(--d-card);
+  border: 1px solid var(--d-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--d-dim);
+}
+
+.dash-car-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--d-text);
+}
+
+/* Booking # */
+.dash-booking-num {
+  color: var(--d-gold);
+  font-weight: 600;
+  font-size: 12px;
+}
+
+/* Customer cell */
+.dash-customer-name {
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.dash-customer-email {
+  font-size: 10px;
+  color: var(--d-muted);
+  margin-top: 2px;
+}
+
+/* Status badge */
+.dash-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.dash-status-badge.delivered {
+  background: rgba(34, 197, 94, 0.12);
+  color: var(--d-green);
+}
+
+.dash-status-badge.waiting {
+  background: rgba(184, 150, 90, 0.12);
+  color: var(--d-gold);
+}
+
+.dash-status-badge.cancelled {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--d-red);
+}
+
+.dash-status-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* Action dots */
+.dash-action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--d-muted);
+  font-size: 18px;
+  letter-spacing: 1px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s;
+  font-family: var(--d-sans);
+}
+
+.dash-action-btn:hover {
+  background: var(--d-card);
+  color: var(--d-text);
+}
+
+/* ── Loading State ──────────────────────────────────────────────────────── */
+.dash-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  gap: 14px;
+}
+
+.dash-loading-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--d-gold);
+  animation: dashLoadPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes dashLoadPulse {
+  0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
+  40%           { transform: scale(1.1); opacity: 1; }
+}
+
+.dash-loading-text {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: var(--d-dim);
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .dash-top-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .dash-listing-card {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .dash-top-row {
+    grid-template-columns: 1fr;
+  }
+
+  .dash-body {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .dash-stat-value {
+    font-size: 28px;
+  }
+
+  .dash-table thead th:nth-child(n+4),
+  .dash-table tbody td:nth-child(n+4) {
+    display: none;
+  }
+
+  .dash-kpi-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .dash-dual-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── KPI Cards Row ──────────────────────────────────────────────────────── */
+.dash-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.dash-kpi-card {
+  background: var(--d-surface);
+  border: 1px solid var(--d-border);
+  border-radius: var(--d-radius);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: border-color 0.3s;
+}
+
+.dash-kpi-card:hover {
+  border-color: var(--d-border-hi);
+}
+
+.dash-kpi-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dash-kpi-body {
+  min-width: 0;
+}
+
+.dash-kpi-label {
+  font-size: 11px;
+  color: var(--d-muted);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  margin-bottom: 4px;
+}
+
+.dash-kpi-value {
+  font-family: var(--d-serif);
+  font-size: 30px;
+  font-weight: 600;
+  color: var(--d-text);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.dash-kpi-sub {
+  font-size: 10px;
+  color: var(--d-dim);
+}
+
+/* ── Dual-column layout for appointments + inquiries ────────────────────── */
+.dash-dual-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+/* ── Spin animation for refresh icon ────────────────────────────────────── */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── Responsive for KPI row ─────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .dash-kpi-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}

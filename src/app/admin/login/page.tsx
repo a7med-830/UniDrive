@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import "./login.css";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -37,55 +38,41 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-[#111111] border border-[#222222] p-8 shadow-2xl">
-        <div className="text-center mb-10">
-          <h1 className="text-3xl tracking-[0.2em] uppercase mb-2 font-serif text-white">
-            UniDrive
-          </h1>
-          <p className="text-[#999999] text-xs tracking-[0.2em] uppercase">
-            Admin Portal
-          </p>
+    <div className="login-root">
+      <div className="login-panel">
+        <div className="login-header">
+          <h1 className="login-wordmark">UNIDRIVE</h1>
+          <p className="login-tagline">Admin Portal</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {error && (
-            <div className="bg-red-950/30 border border-red-900/50 text-red-400 px-4 py-3 text-sm text-center">
-              {error}
-            </div>
-          )}
+        <form onSubmit={handleSubmit} className="login-form">
+          {error && <div className="login-error">{error}</div>}
 
-          <div>
-            <label className="block text-[10px] uppercase tracking-[0.1em] text-[#999999] mb-3">
-              Email Address
-            </label>
+          <div className="login-field">
+            <label className="login-label">Email Address</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-black border border-[#2e2e2e] text-white px-4 py-3 focus:outline-none focus:border-white transition-colors text-sm"
+              className="login-input"
+              placeholder="admin@unidrive.com"
               required
             />
           </div>
 
-          <div>
-            <label className="block text-[10px] uppercase tracking-[0.1em] text-[#999999] mb-3">
-              Password
-            </label>
+          <div className="login-field">
+            <label className="login-label">Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-black border border-[#2e2e2e] text-white px-4 py-3 focus:outline-none focus:border-white transition-colors text-sm"
+              className="login-input"
+              placeholder="••••••••"
               required
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full border border-white bg-white text-black py-4 mt-8 text-[10px] font-semibold uppercase tracking-[0.2em] hover:bg-transparent hover:text-white transition-colors disabled:opacity-50"
-          >
+          <button type="submit" disabled={loading} className="login-btn">
             {loading ? "Authenticating..." : "Sign In"}
           </button>
         </form>

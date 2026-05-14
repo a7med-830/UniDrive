@@ -128,7 +128,7 @@ export default function CarDetailPage() {
 
   const [activeImage, setActiveImage] = useState(car?.images?.[0] ?? "");
   const [thumbnailIndex, setThumbnailIndex] = useState(0);
-  const [form, setForm]               = useState({ name: "", email: "", phone: "", message: "" });
+  const [form, setForm]               = useState({ name: "", email: "", phone: "", message: "", scheduledAt: "" });
   const [submitted, setSubmitted]     = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
   const [overlayImage, setOverlayImage] = useState("");
@@ -181,7 +181,31 @@ export default function CarDetailPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); setSubmitted(true); };
+  const handleSubmit = async (e: React.FormEvent) => { 
+    e.preventDefault(); 
+    try {
+      const res = await fetch("/api/appointments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          carId: car?.id,
+          clientName: form.name,
+          clientEmail: form.email,
+          scheduledAt: new Date(form.scheduledAt).toISOString(),
+          status: "under reviewing",
+          notes: `Phone: ${form.phone}\nMessage: ${form.message}`
+        })
+      });
+      if (res.ok) {
+        setSubmitted(true);
+      } else {
+        alert("Failed to submit request.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("An error occurred.");
+    }
+  };
 
   // ── Input style ──────────────────────────────────────────────────────────────
   const inp: React.CSSProperties = {
@@ -443,6 +467,12 @@ export default function CarDetailPage() {
                   <div>
                     <label style={lbl}>Phone</label>
                     <input type="tel" name="phone" value={form.phone} onChange={handleChange} placeholder="+1 555 000 0000" style={inp}
+                      onFocus={e => (e.target as HTMLInputElement).style.borderBottomColor = "rgba(255,255,255,0.5)"}
+                      onBlur={e  => (e.target as HTMLInputElement).style.borderBottomColor = "rgba(255,255,255,0.15)"} />
+                  </div>
+                  <div>
+                    <label style={lbl}>Scheduled Date & Time *</label>
+                    <input type="datetime-local" name="scheduledAt" value={form.scheduledAt} onChange={handleChange} required style={{...inp, colorScheme: "dark"}}
                       onFocus={e => (e.target as HTMLInputElement).style.borderBottomColor = "rgba(255,255,255,0.5)"}
                       onBlur={e  => (e.target as HTMLInputElement).style.borderBottomColor = "rgba(255,255,255,0.15)"} />
                   </div>

@@ -17,6 +17,7 @@ const PRICE_RANGES = [
   { label: "$50k – $60k",   min: 50000, max: 60000 },
   { label: "Over $60k",     min: 60000, max: Infinity },
 ];
+const STATUSES       = ["available", "reserved", "sold"];
 
 // ─── Navbar (shared) ──────────────────────────────────────────────────────────
 function Navbar() {
@@ -133,6 +134,7 @@ function InventoryContent() {
   const [selectedYears,   setSelectedYears]   = useState<number[]>([]);
   const [selectedPrices,  setSelectedPrices]  = useState<string[]>([]);
   const [selectedFuels,   setSelectedFuels]   = useState<string[]>([]);
+  const [selectedStatuses,setSelectedStatuses]= useState<string[]>([]);
   const [sortBy,          setSortBy]          = useState("price_asc");
   const [filteredCars,    setFilteredCars]    = useState<Car[]>([]);
   const [totalCount,      setTotalCount]      = useState(0);
@@ -145,7 +147,7 @@ function InventoryContent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const activeFilters = [...selectedBrands, ...selectedBodies, ...selectedColors, ...selectedYears.map(String), ...selectedPrices, ...selectedFuels];
+  const activeFilters = [...selectedBrands, ...selectedBodies, ...selectedColors, ...selectedYears.map(String), ...selectedPrices, ...selectedFuels, ...selectedStatuses];
 
   const fetchFromAPI = useCallback(async () => {
     setLoading(true);
@@ -154,6 +156,7 @@ function InventoryContent() {
       if (selectedBrands.length === 1) params.set("brand", selectedBrands[0]);
       if (selectedBodies.length  === 1) params.set("body",  selectedBodies[0]);
       if (selectedFuels.length   === 1) params.set("fuel",  selectedFuels[0]);
+      if (selectedStatuses.length=== 1) params.set("status",selectedStatuses[0]);
       if (selectedYears.length   === 1) params.set("year",  String(selectedYears[0]));
       if (selectedPrices.length  === 1) {
         const p = PRICE_RANGES.find(p => p.label === selectedPrices[0]);
@@ -171,6 +174,7 @@ function InventoryContent() {
       if (selectedBrands.length > 1) refined = refined.filter(c => selectedBrands.includes(c.make));
       if (selectedBodies.length  > 1) refined = refined.filter(c => selectedBodies.includes(c.body));
       if (selectedFuels.length   > 1) refined = refined.filter(c => selectedFuels.includes(c.fuelType));
+      if (selectedStatuses.length> 1) refined = refined.filter(c => selectedStatuses.includes(c.status));
       if (selectedYears.length   > 1) refined = refined.filter(c => selectedYears.includes(c.year));
       if (selectedColors.length)       refined = refined.filter(c => selectedColors.includes(c.color));
       if (selectedPrices.length  > 1) {
@@ -187,7 +191,7 @@ function InventoryContent() {
     } finally {
       setLoading(false);
     }
-  }, [searchText, selectedBrands, selectedBodies, selectedColors, selectedYears, selectedPrices, selectedFuels, sortBy]);
+  }, [searchText, selectedBrands, selectedBodies, selectedColors, selectedYears, selectedPrices, selectedFuels, selectedStatuses, sortBy]);
 
   useEffect(() => { fetchFromAPI(); }, [fetchFromAPI]);
 
@@ -196,8 +200,9 @@ function InventoryContent() {
   const count = (_key: string, v: string | number) => filteredCars.filter(c => Object.values(c).includes(v)).length;
   const countP = (l: string) => { const p = PRICE_RANGES.find(p => p.label === l); return p ? filteredCars.filter(c => c.price >= p.min && c.price < p.max).length : 0; };
   const countF = (f: string) => filteredCars.filter(c => c.fuelType === f).length;
-  function clearAll() { setSearchText(""); setSelectedBrands([]); setSelectedBodies([]); setSelectedColors([]); setSelectedYears([]); setSelectedPrices([]); setSelectedFuels([]); }
-  function remove(l: string) { setSelectedBrands(p => p.filter(x => x !== l)); setSelectedBodies(p => p.filter(x => x !== l)); setSelectedColors(p => p.filter(x => x !== l)); setSelectedYears(p => p.filter(x => String(x) !== l)); setSelectedPrices(p => p.filter(x => x !== l)); setSelectedFuels(p => p.filter(x => x !== l)); }
+  const countS = (s: string) => filteredCars.filter(c => c.status === s).length;
+  function clearAll() { setSearchText(""); setSelectedBrands([]); setSelectedBodies([]); setSelectedColors([]); setSelectedYears([]); setSelectedPrices([]); setSelectedFuels([]); setSelectedStatuses([]); }
+  function remove(l: string) { setSelectedBrands(p => p.filter(x => x !== l)); setSelectedBodies(p => p.filter(x => x !== l)); setSelectedColors(p => p.filter(x => x !== l)); setSelectedYears(p => p.filter(x => String(x) !== l)); setSelectedPrices(p => p.filter(x => x !== l)); setSelectedFuels(p => p.filter(x => x !== l)); setSelectedStatuses(p => p.filter(x => x !== l)); }
 
   const sidebar = (
     <>
@@ -225,6 +230,9 @@ function InventoryContent() {
       </FilterSection>
       <FilterSection title="Color">
         {COLORS.map(col => <Check key={col} label={col} count={count("color", col)} checked={selectedColors.includes(col)} onChange={() => setSelectedColors(toggle(selectedColors, col))} />)}
+      </FilterSection>
+      <FilterSection title="Status">
+        {STATUSES.map(s => <Check key={s} label={s.toUpperCase()} count={countS(s)} checked={selectedStatuses.includes(s)} onChange={() => setSelectedStatuses(toggle(selectedStatuses, s))} />)}
       </FilterSection>
     </>
   );
@@ -337,9 +345,9 @@ function InventoryContent() {
                   <div style={{ position: "relative", overflow: "hidden", aspectRatio: "16/9" }}>
                     <img src={car.image} alt={car.name}
                       style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "transform 0.7s cubic-bezier(0.16,1,0.3,1)" }} />
-                    {/* Badge pill */}
+                    {/* Status pill */}
                     <span style={{ position: "absolute", top: 12, left: 12, fontSize: 7, letterSpacing: "0.18em", padding: "4px 10px", textTransform: "uppercase", background: "rgba(0,0,0,0.75)", color: "var(--light)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(4px)" }}>
-                      {car.badge}
+                      {car.status}
                     </span>
                   </div>
 
