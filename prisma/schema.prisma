@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Car {
+  id           Int           @id @default(autoincrement())
+  name         String
+  make         String
+  model        String
+  year         Int
+  price        Int
+  body         String?
+  color        String?
+  mileage      String?
+  mpg          String?
+  fuelType     String
+  image        String?
+  images       String[]
+  badge        String?
+  trim         String?
+  engine       String?
+  transmission String?
+  drivetrain   String?
+  seats        Int?
+  description  String?
+  features     String[]
+  status       String        @default("available")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  inquiries    Inquiry[]
+  appointments Appointment[]
+  bookings     Booking[]
+}
+
+model Inquiry {
+  id            Int       @id @default(autoincrement())
+  carId         Int
+  car           Car       @relation(fields: [carId], references: [id])
+  name          String
+  email         String
+  phone         String?
+  message       String?
+  preferredDate DateTime?
+  status        String    @default("new")
+  createdAt     DateTime  @default(now())
+}
+
+model ContactMessage {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  phone     String?
+  message   String
+  createdAt DateTime @default(now())
+}
+
+model Appointment {
+  id          Int      @id @default(autoincrement())
+  carId       Int
+  car         Car      @relation(fields: [carId], references: [id])
+  clientName  String
+  clientEmail String?
+  scheduledAt DateTime
+  status      String   @default("pending")
+  notes       String?
+  createdAt   DateTime @default(now())
+}
+
+model NewsArticle {
+  id          Int       @id @default(autoincrement())
+  title       String
+  body        String?
+  category    String?
+  status      String    @default("draft")
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Booking {
+  id        Int      @id @default(autoincrement())
+  car       Car      @relation(fields: [carId], references: [id])
+  carId     Int
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  date      DateTime
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+}
+
+model User {
+  id       Int       @id @default(autoincrement())
+  name     String
+  email    String    @unique
+  password String
+  role     String    @default("user")
+  bookings Booking[]
+}

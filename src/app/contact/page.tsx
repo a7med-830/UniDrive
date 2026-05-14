@@ -105,15 +105,23 @@ function ContactForm() {
   const [formData, setFormData] = useState({ name: "", email: "", phone: "", message: "" });
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus("submitting");
-    // Simulate an API call
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (!res.ok) throw new Error("Failed");
       setStatus("success");
       setFormData({ name: "", email: "", phone: "", message: "" });
       setTimeout(() => setStatus("idle"), 5000);
-    }, 1500);
+    } catch {
+      setStatus("error");
+      setTimeout(() => setStatus("idle"), 4000);
+    }
   };
 
   return (
@@ -180,6 +188,9 @@ function ContactForm() {
 
       {status === "success" && (
         <p style={{ color: "var(--gold)", fontSize: 12, letterSpacing: "0.08em", marginTop: 8 }}>Thank you! Your message has been sent successfully.</p>
+      )}
+      {status === "error" && (
+        <p style={{ color: "#e05c5c", fontSize: 12, letterSpacing: "0.08em", marginTop: 8 }}>Something went wrong. Please try again or email us directly.</p>
       )}
     </form>
   );

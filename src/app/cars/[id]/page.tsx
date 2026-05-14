@@ -1,10 +1,10 @@
 // src/app/cars/[id]/page.tsx
 "use client";
-import { useEffect, useRef, useState, use } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 import { Car, getCarById, getAllCars } from "@/lib/carsData";
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
@@ -940,13 +940,10 @@ function PageFooter({ car }: { car: Car }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 
-type PageProps = { params: Promise<{ id: string }> };
-
-
-export default function CarDetailPage({ params }: PageProps) {
-    const resolvedParams = use(params);
-
-  const car = getCarById(resolvedParams.id);
+export default function CarDetailPage() {
+  const params = useParams<{ id: string | string[] }>();
+  const carId = Array.isArray(params.id) ? params.id[0] : params.id;
+  const car = carId ? getCarById(carId) : null;
   const allCars = getAllCars();
   const [activeSection, setActiveSection] = useState<NavSection>("INTRODUCTION");
 

@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { getCarById } from "@/lib/cars";
+import type { Car } from "@/lib/cars";
 
 // ─── Navbar ───────────────────────────────────────────────────────────────────
 function Navbar() {
@@ -75,7 +75,56 @@ function Footer() {
 // ─── Detail page ──────────────────────────────────────────────────────────────
 export default function CarDetailPage() {
   const params = useParams();
-  const car    = getCarById(Number(params.id));
+  const [car, setCar] = useState<Car | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const id = Array.isArray(params.id) ? params.id[0] : params.id;
+    if (!id) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchCar = async () => {
+      try {
+        const res = await fetch(`/api/cars/${id}`);
+        if (!res.ok) {
+          setCar(null);
+          return;
+        }
+        const data = await res.json();
+        const carData = {
+          ...data,
+          body: data.body ?? "",
+          color: data.color ?? "",
+          mileage: data.mileage ?? "",
+          mpg: data.mpg ?? "",
+          image: data.image ?? "",
+          images: Array.isArray(data.images) ? data.images : [],
+          badge: data.badge ?? "",
+          trim: data.trim ?? "",
+          engine: data.engine ?? "",
+          transmission: data.transmission ?? "",
+          drivetrain: data.drivetrain ?? "",
+          seats: data.seats ?? 0,
+          description: data.description ?? "",
+          features: Array.isArray(data.features) ? data.features : [],
+        } as Car;
+        setCar(carData);
+        if (carData.images && carData.images.length > 0) {
+          setActiveImage(carData.images[0]);
+        } else if (carData.image) {
+          setActiveImage(carData.image);
+        }
+      } catch {
+        setCar(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCar();
+  }, [params.id]);
 
   const [activeImage, setActiveImage] = useState(car?.images?.[0] ?? "");
   const [thumbnailIndex, setThumbnailIndex] = useState(0);
@@ -148,6 +197,12 @@ export default function CarDetailPage() {
   };
 
   // ── Not found ─────────────────────────────────────────────────────────────────
+  if (loading) return (
+    <div style={{ minHeight: "100vh", background: "var(--black)", fontFamily: "var(--sans)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <p style={{ fontSize: 10, letterSpacing: "0.14em", color: "var(--dim)" }}>LOADING VEHICLE...</p>
+    </div>
+  );
+
   if (!car) return (
     <div style={{ minHeight: "100vh", background: "var(--black)", fontFamily: "var(--sans)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "0 40px" }}>
       <Navbar />
@@ -161,59 +216,60 @@ export default function CarDetailPage() {
     <div style={{ background: "var(--black)", minHeight: "100vh", fontFamily: "var(--sans)", color: "var(--white)" }}>
       <Navbar />
 
-      {/* ── HERO IMAGE ────────────────────────────────────────────────────── */}
-      <div style={{ position: "relative", width: "100%", height: "70vh", minHeight: 420, overflow: "hidden", cursor: "pointer" }}
-        onClick={() => openOverlay(activeImage)}>
-        <img src={activeImage} alt={car.name}
-          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "opacity 0.3s" }} />
-        {/* Dark gradient overlay */}
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.15) 50%, transparent 100%)" }} />
-        {/* Expand button */}
-        <button
-          onClick={(e) => { e.stopPropagation(); openOverlay(activeImage); }}
-          style={{
-            position: "absolute",
-            bottom: 48,
-            right: 48,
-            padding: "12px 20px",
-            fontSize: 11,
-            letterSpacing: "0.12em",
-            background: "rgba(255,255,255,0.1)",
-            border: "1px solid rgba(255,255,255,0.3)",
-            color: "rgba(255,255,255,0.8)",
-            cursor: "pointer",
-            fontFamily: "var(--sans)",
-            backdropFilter: "blur(4px)",
-            transition: "all 0.2s",
-          }}
-          onMouseEnter={(e) => {
-            (e.target as HTMLButtonElement).style.background = "rgba(255,255,255,0.15)";
-            (e.target as HTMLButtonElement).style.color = "rgba(255,255,255,1)";
-            (e.target as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.5)";
-          }}
-          onMouseLeave={(e) => {
-            (e.target as HTMLButtonElement).style.background = "rgba(255,255,255,0.1)";
-            (e.target as HTMLButtonElement).style.color = "rgba(255,255,255,0.8)";
-            (e.target as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.3)";
-          }}
-        >
-          ⛶ EXPAND
-        </button>
-        {/* Hero text */}
-        <div style={{ position: "absolute", bottom: 48, left: 48, right: 48 }}>
-          <div style={{ fontSize: 8, letterSpacing: "0.28em", color: "var(--mid)", marginBottom: 10 }}>
-            {car.make.toUpperCase()} · {car.year}
+      {activeImage && (
+        <div style={{ position: "relative", width: "100%", height: "70vh", minHeight: 420, overflow: "hidden", cursor: "pointer" }}
+          onClick={() => openOverlay(activeImage)}>
+          <img src={activeImage} alt={car.name}
+            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "opacity 0.3s" }} />
+          {/* Dark gradient overlay */}
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.15) 50%, transparent 100%)" }} />
+          {/* Expand button */}
+          <button
+            onClick={(e) => { e.stopPropagation(); openOverlay(activeImage); }}
+            style={{
+              position: "absolute",
+              bottom: 48,
+              right: 48,
+              padding: "12px 20px",
+              fontSize: 11,
+              letterSpacing: "0.12em",
+              background: "rgba(255,255,255,0.1)",
+              border: "1px solid rgba(255,255,255,0.3)",
+              color: "rgba(255,255,255,0.8)",
+              cursor: "pointer",
+              fontFamily: "var(--sans)",
+              backdropFilter: "blur(4px)",
+              transition: "all 0.2s",
+            }}
+            onMouseEnter={(e) => {
+              (e.target as HTMLButtonElement).style.background = "rgba(255,255,255,0.15)";
+              (e.target as HTMLButtonElement).style.color = "rgba(255,255,255,1)";
+              (e.target as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.5)";
+            }}
+            onMouseLeave={(e) => {
+              (e.target as HTMLButtonElement).style.background = "rgba(255,255,255,0.1)";
+              (e.target as HTMLButtonElement).style.color = "rgba(255,255,255,0.8)";
+              (e.target as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.3)";
+            }}
+          >
+            ⛶ EXPAND
+          </button>
+          {/* Hero text */}
+          <div style={{ position: "absolute", bottom: 48, left: 48, right: 48 }}>
+            <div style={{ fontSize: 8, letterSpacing: "0.28em", color: "var(--mid)", marginBottom: 10 }}>
+              {car.make.toUpperCase()} · {car.year}
+            </div>
+            <h1 style={{ fontFamily: "var(--serif)", fontSize: "clamp(28px, 5vw, 64px)", letterSpacing: "0.06em", fontWeight: 400, lineHeight: 1.05, marginBottom: 10 }}>
+              {car.name.toUpperCase()}
+            </h1>
+            <p style={{ fontSize: 10, color: "var(--mid)", letterSpacing: "0.14em" }}>{car.trim} · {car.body}</p>
           </div>
-          <h1 style={{ fontFamily: "var(--serif)", fontSize: "clamp(28px, 5vw, 64px)", letterSpacing: "0.06em", fontWeight: 400, lineHeight: 1.05, marginBottom: 10 }}>
-            {car.name.toUpperCase()}
-          </h1>
-          <p style={{ fontSize: 10, color: "var(--mid)", letterSpacing: "0.14em" }}>{car.trim} · {car.body}</p>
+          {/* Badge */}
+          <span style={{ position: "absolute", top: 88, left: 48, fontSize: 7, letterSpacing: "0.20em", padding: "5px 12px", textTransform: "uppercase", background: "rgba(0,0,0,0.75)", color: "var(--light)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(4px)" }}>
+            {car.badge}
+          </span>
         </div>
-        {/* Badge */}
-        <span style={{ position: "absolute", top: 88, left: 48, fontSize: 7, letterSpacing: "0.20em", padding: "5px 12px", textTransform: "uppercase", background: "rgba(0,0,0,0.75)", color: "var(--light)", border: "1px solid rgba(255,255,255,0.15)", backdropFilter: "blur(4px)" }}>
-          {car.badge}
-        </span>
-      </div>
+      )}
 
       {/* ── THUMBNAIL STRIP ───────────────────────────────────────────────── */}
       <div style={{ display: "flex", alignItems: "center", gap: 0, background: "var(--dark1)", padding: "2px 0", position: "relative" }}>
@@ -249,7 +305,7 @@ export default function CarDetailPage() {
           {currentThumbnails.map((img, i) => (
             <button key={thumbnailIndex + i} onClick={() => setActiveImage(img)}
               style={{ padding: 0, background: "none", border: "none", cursor: "pointer", flex: "1 1 0", aspectRatio: "16/9", overflow: "hidden", opacity: activeImage === img ? 1 : 0.45, outline: activeImage === img ? "1px solid rgba(255,255,255,0.5)" : "none", outlineOffset: -1, transition: "opacity 0.2s" }}>
-              <img src={img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+              {img && <img src={img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />}
             </button>
           ))}
         </div>
@@ -451,16 +507,18 @@ export default function CarDetailPage() {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <img
-              src={overlayImage}
-              alt="Expanded view"
-              style={{
-                maxWidth: "100%",
-                maxHeight: "100%",
-                objectFit: "contain",
-                display: "block",
-              }}
-            />
+            {overlayImage && (
+              <img
+                src={overlayImage}
+                alt="Expanded view"
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: "100%",
+                  objectFit: "contain",
+                  display: "block",
+                }}
+              />
+            )}
             
             {/* Left Arrow */}
             {totalImages > 1 && (

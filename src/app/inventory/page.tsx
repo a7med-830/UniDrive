@@ -3,10 +3,10 @@
 import React, { useState, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { allCars } from "@/lib/cars";
+import type { Car } from "@/lib/cars";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const BRANDS       = [...new Set(allCars.map(c => c.make))].sort();
+const BRANDS       = ["Aston Martin","Audi","Bentley","BMW","Cadillac","Ferrari","Genesis","Land Rover","Lamborghini","Lexus","Maserati","Mercedes","Porsche","Rolls-Royce","Tesla"];
 const BODY_STYLES  = ["Sedan", "SUV", "Coupe", "Truck", "Wagon"];
 const COLORS       = ["Black", "White", "Silver", "Blue", "Gray", "Red"];
 const FUEL_TYPES   = ["Petrol", "Electric", "Hybrid"];
@@ -134,7 +134,9 @@ function InventoryContent() {
   const [selectedPrices,  setSelectedPrices]  = useState<string[]>([]);
   const [selectedFuels,   setSelectedFuels]   = useState<string[]>([]);
   const [sortBy,          setSortBy]          = useState("price_asc");
-  const [filteredCars,    setFilteredCars]    = useState(allCars);
+  const [filteredCars,    setFilteredCars]    = useState<Car[]>([]);
+  const [totalCount,      setTotalCount]      = useState(0);
+  const [loading,         setLoading]         = useState(true);
   const [mobileOpen,      setMobileOpen]      = useState(false);
 
   useEffect(() => {
@@ -145,25 +147,55 @@ function InventoryContent() {
 
   const activeFilters = [...selectedBrands, ...selectedBodies, ...selectedColors, ...selectedYears.map(String), ...selectedPrices, ...selectedFuels];
 
-  const applyFilters = useCallback(() => {
-    let r = [...allCars];
-    if (selectedBrands.length) r = r.filter(c => selectedBrands.includes(c.make));
-    if (searchText.trim()) { const q = searchText.toLowerCase(); r = r.filter(c => c.name.toLowerCase().includes(q) || c.model.toLowerCase().includes(q)); }
-    if (selectedBodies.length) r = r.filter(c => selectedBodies.includes(c.body));
-    if (selectedColors.length) r = r.filter(c => selectedColors.includes(c.color));
-    if (selectedYears.length)  r = r.filter(c => selectedYears.includes(c.year));
-    if (selectedPrices.length) r = r.filter(c => selectedPrices.some(l => { const p = PRICE_RANGES.find(p => p.label === l); return p ? c.price >= p.min && c.price < p.max : false; }));
-    if (selectedFuels.length) r = r.filter(c => selectedFuels.includes(c.fuelType));
-    r.sort((a, b) => sortBy === "price_asc" ? a.price - b.price : sortBy === "price_desc" ? b.price - a.price : sortBy === "year_desc" ? b.year - a.year : a.year - b.year);
-    setFilteredCars(r);
+  const fetchFromAPI = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (selectedBrands.length === 1) params.set("brand", selectedBrands[0]);
+      if (selectedBodies.length  === 1) params.set("body",  selectedBodies[0]);
+      if (selectedFuels.length   === 1) params.set("fuel",  selectedFuels[0]);
+      if (selectedYears.length   === 1) params.set("year",  String(selectedYears[0]));
+      if (selectedPrices.length  === 1) {
+        const p = PRICE_RANGES.find(p => p.label === selectedPrices[0]);
+        if (p) { params.set("minPrice", String(p.min)); if (p.max !== Infinity) params.set("maxPrice", String(p.max)); }
+      }
+      if (searchText.trim()) params.set("search", searchText.trim());
+      params.set("sort", sortBy);
+
+      const res = await fetch(`/api/cars?${params.toString()}`);
+      if (!res.ok) throw new Error("Failed");
+      const data: Car[] = await res.json();
+
+      // Client-side multi-select refinement for multiple selections
+      let refined = data;
+      if (selectedBrands.length > 1) refined = refined.filter(c => selectedBrands.includes(c.make));
+      if (selectedBodies.length  > 1) refined = refined.filter(c => selectedBodies.includes(c.body));
+      if (selectedFuels.length   > 1) refined = refined.filter(c => selectedFuels.includes(c.fuelType));
+      if (selectedYears.length   > 1) refined = refined.filter(c => selectedYears.includes(c.year));
+      if (selectedColors.length)       refined = refined.filter(c => selectedColors.includes(c.color));
+      if (selectedPrices.length  > 1) {
+        refined = refined.filter(c => selectedPrices.some(l => {
+          const p = PRICE_RANGES.find(p => p.label === l);
+          return p ? c.price >= p.min && c.price < p.max : false;
+        }));
+      }
+
+      setFilteredCars(refined);
+      setTotalCount(refined.length);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }, [searchText, selectedBrands, selectedBodies, selectedColors, selectedYears, selectedPrices, selectedFuels, sortBy]);
 
-  useEffect(() => { applyFilters(); }, [applyFilters]);
+  useEffect(() => { fetchFromAPI(); }, [fetchFromAPI]);
 
   function toggle<T>(arr: T[], v: T): T[] { return arr.includes(v) ? arr.filter(x => x !== v) : [...arr, v]; }
-  const count = (key: keyof typeof allCars[0], v: string | number) => allCars.filter(c => c[key] === v).length;
-  const countP = (l: string) => { const p = PRICE_RANGES.find(p => p.label === l); return p ? allCars.filter(c => c.price >= p.min && c.price < p.max).length : 0; };
-  const countF = (f: string) => allCars.filter(c => c.fuelType === f).length;
+  // Count helpers — approximate from current results since we no longer have the full static array
+  const count = (_key: string, v: string | number) => filteredCars.filter(c => Object.values(c).includes(v)).length;
+  const countP = (l: string) => { const p = PRICE_RANGES.find(p => p.label === l); return p ? filteredCars.filter(c => c.price >= p.min && c.price < p.max).length : 0; };
+  const countF = (f: string) => filteredCars.filter(c => c.fuelType === f).length;
   function clearAll() { setSearchText(""); setSelectedBrands([]); setSelectedBodies([]); setSelectedColors([]); setSelectedYears([]); setSelectedPrices([]); setSelectedFuels([]); }
   function remove(l: string) { setSelectedBrands(p => p.filter(x => x !== l)); setSelectedBodies(p => p.filter(x => x !== l)); setSelectedColors(p => p.filter(x => x !== l)); setSelectedYears(p => p.filter(x => String(x) !== l)); setSelectedPrices(p => p.filter(x => x !== l)); setSelectedFuels(p => p.filter(x => x !== l)); }
 
@@ -214,7 +246,7 @@ function InventoryContent() {
             VEHICLES
           </h1>
           <p style={{ fontSize: 11, color: "var(--mid)", letterSpacing: "0.10em", fontWeight: 300 }}>
-            {allCars.length} CARS AVAILABLE
+            {loading ? "Loading..." : `${totalCount} CARS AVAILABLE`}
           </p>
         </div>
       </div>

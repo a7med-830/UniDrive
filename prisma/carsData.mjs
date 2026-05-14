@@ -1,63 +1,4 @@
-// ─── Car type ─────────────────────────────────────────────────────────────────
-// Single source of truth for the Car shape, shared across the app.
-
-export type Car = {
-  id: number;
-  name: string;
-  make: string;
-  model: string;
-  year: number;
-  price: number;
-  body: string;
-  color: string;
-  mileage: string;
-  mpg: string;
-  fuelType: "Petrol" | "Electric" | "Hybrid";
-  image: string;
-  images: string[];
-  badge: string;
-  trim: string;
-  engine: string;
-  transmission: string;
-  drivetrain: string;
-  seats: number;
-  description: string;
-  features: string[];
-  status?: string;
-};
-
-// ─── API helpers ──────────────────────────────────────────────────────────────
-// Use these everywhere instead of importing allCars directly.
-
-const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-
-export async function fetchCars(
-  params: Record<string, string | number> = {}
-): Promise<Car[]> {
-  const qs = new URLSearchParams(
-    Object.entries(params).map(([k, v]) => [k, String(v)])
-  ).toString();
-  const res = await fetch(`${BASE}/api/cars${qs ? `?${qs}` : ""}`, {
-    next: { revalidate: 60 }, // ISR: refresh every 60 seconds
-  });
-  if (!res.ok) throw new Error("Failed to fetch cars");
-  return res.json();
-}
-
-export async function fetchCarById(id: number): Promise<Car | null> {
-  const res = await fetch(`${BASE}/api/cars/${id}`, {
-    next: { revalidate: 60 },
-  });
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error("Failed to fetch car");
-  return res.json();
-}
-
-// ─── Legacy static array ───────────────────────────────────────────────────────
-// ONLY used by prisma/seed.ts to populate the database.
-// Do NOT import allCars in page components — use fetchCars() instead.
-
-export const allCars: Car[] = [
+export const allCars = [
 
   // ── BMW ────────────────────────────────────────────────────────────────────
  {
@@ -1218,8 +1159,3 @@ export const allCars: Car[] = [
     features: ["789 hp Combined Output", "25.9 kWh Battery", "EV-Only Driving Mode", "Redesigned Hood and Matrix LED Headlights", "New 12.3-inch Infotainment", "All-Wheel Drive with Electronic Rear Differential", "Optimized Aerodynamics"],
   }
 ];
-
-// ── Helper: look up a single car by ID ────────────────────────────────────────
-export function getCarById(id: number): Car | undefined {
-  return allCars.find((c) => c.id === id);
-}

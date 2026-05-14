@@ -326,7 +326,7 @@ function Header() {
             ))}
             <div style={{ display: "flex", gap: 16, marginLeft: 8 }}>
               <button style={{ background: "none", border: "none", color: "var(--text-mid)", cursor: "pointer", padding: 4, display: "flex" }}><SearchIcon /></button>
-              <button style={{ background: "none", border: "none", color: "var(--text-mid)", cursor: "pointer", padding: 4, display: "flex" }}><UserIcon /></button>
+              <Link href="/admin/login" style={{ color: "var(--text-mid)", padding: 4, display: "flex" }}><UserIcon /></Link>
             </div>
           </div>
 

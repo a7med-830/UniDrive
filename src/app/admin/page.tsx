@@ -1,530 +1,480 @@
 "use client";
 
-import React, { useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import "../page-styles.css"; // Reuse the main site's CSS variables and fonts
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { 
+  TrendingUp, 
+  TrendingDown, 
+  CheckCircle2, 
+  XCircle, 
+  Search,
+  Plus,
+  Pencil,
+  Trash2,
+  Activity,
+  Award,
+  Car as CarIcon,
+  ChevronRight,
+  Filter,
+  Download
+} from "lucide-react";
 
-// Simple SVG Icons
-const Icons = {
-  Dashboard: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter" {...props}><rect width="7" height="9" x="3" y="3"/><rect width="7" height="5" x="14" y="3"/><rect width="7" height="9" x="14" y="12"/><rect width="7" height="5" x="3" y="16"/></svg>
-  ),
-  Car: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter" {...props}><path d="M19 17h2v-4c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v5h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
-  ),
-  FileText: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter" {...props}><path d="M15 2H6v20h12V7Z"/><path d="M14 2v5h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
-  ),
-  CalendarCheck: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter" {...props}><rect width="18" height="18" x="3" y="4"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="m9 16 2 2 4-4"/></svg>
-  ),
-  LogOut: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter" {...props}><path d="M9 21H5V3h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
-  ),
-  Plus: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter" {...props}><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
-  ),
-  Search: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter" {...props}><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg>
-  ),
-  Edit: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter" {...props}><path d="M12 20h9"/><path d="M16.5 3.5l4 4L7 21l-4 1 1-4L16.5 3.5z"/></svg>
-  ),
-  Trash: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter" {...props}><path d="M3 6h18"/><path d="M19 6v14H5V6"/><path d="M8 6V4h8v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-  ),
+type Car = {
+  id: number;
+  name: string;
+  make: string;
+  model: string;
+  year: number;
+  price: number;
+  fuelType: string;
+  status: string;
+  body?: string | null;
+  color?: string | null;
+  mileage?: string | null;
+  mpg?: string | null;
+  badge?: string | null;
+  trim?: string | null;
+  engine?: string | null;
+  transmission?: string | null;
+  drivetrain?: string | null;
+  seats?: number | null;
+  description?: string | null;
+  features?: string[];
+  image?: string | null;
+  images?: string[];
 };
 
-type Tab = "overview" | "vehicles" | "news" | "bookings";
+const initialForm = {
+  name: "",
+  make: "",
+  model: "",
+  year: 2024,
+  price: 50000,
+  fuelType: "Petrol",
+  status: "available",
+  body: "",
+  color: "",
+  mileage: "",
+  mpg: "",
+  badge: "",
+  trim: "",
+  engine: "",
+  transmission: "",
+  drivetrain: "",
+  seats: 5,
+  description: "",
+  features: "",
+  image: "",
+  images: "",
+};
 
-export default function AdminPage() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [activeTab, setActiveTab] = useState<Tab>("overview");
+export default function AdminDashboard() {
+  const router = useRouter();
+  const [cars, setCars] = useState<Car[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingCarId, setEditingCarId] = useState<number | null>(null);
+  const [formData, setFormData] = useState(initialForm);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  if (!isLoggedIn) {
-    return <LoginView onLogin={() => setIsLoggedIn(true)} />;
-  }
+  const fetchCars = async () => {
+    try {
+      const res = await fetch("/api/cars?limit=1000");
+      if (res.ok) {
+        const data = await res.json();
+        setCars(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch cars", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCars();
+  }, []);
+
+  const handleOpenModal = (car?: Car) => {
+    if (car) {
+      setEditingCarId(car.id);
+      setFormData({
+        name: car.name,
+        make: car.make,
+        model: car.model,
+        year: car.year,
+        price: car.price,
+        fuelType: car.fuelType,
+        status: car.status,
+        body: car.body || "",
+        color: car.color || "",
+        mileage: car.mileage || "",
+        mpg: car.mpg || "",
+        badge: car.badge || "",
+        trim: car.trim || "",
+        engine: car.engine || "",
+        transmission: car.transmission || "",
+        drivetrain: car.drivetrain || "",
+        seats: car.seats || 5,
+        description: car.description || "",
+        features: car.features ? car.features.join(", ") : "",
+        image: car.image || "",
+        images: car.images ? car.images.join(", ") : "",
+      });
+    } else {
+      setEditingCarId(null);
+      setFormData(initialForm);
+    }
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingCarId(null);
+    setFormData(initialForm);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this car?")) return;
+    try {
+      const res = await fetch(`/api/cars/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        fetchCars();
+      } else {
+        alert("Failed to delete car");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const isEdit = editingCarId !== null;
+      const url = isEdit ? `/api/cars/${editingCarId}` : `/api/cars`;
+      const method = isEdit ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          year: Number(formData.year),
+          price: Number(formData.price),
+          seats: Number(formData.seats),
+          features: formData.features.split(",").map(s => s.trim()).filter(Boolean),
+          images: formData.images.split(",").map(s => s.trim()).filter(Boolean),
+        }),
+      });
+
+      if (res.ok) {
+        handleCloseModal();
+        fetchCars();
+      } else {
+        const data = await res.json();
+        alert(`Error: ${JSON.stringify(data.error)}`);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save car");
+    }
+  };
+
+  const filteredCars = cars.filter(c => 
+    c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    c.make.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <div className="flex h-screen bg-[#000000] text-[#ffffff] overflow-hidden" style={{ fontFamily: "var(--font-body)" }}>
-      {/* Sidebar - Sharp, Dark, Minimal */}
-      <aside className="w-70 bg-[#080808] border-r border-[#ffffff20] flex flex-col">
-        {/* Logo Area */}
-        <div className="h-25 flex items-center justify-center border-b border-[#ffffff15]">
-          <Link href="/" className="flex flex-col items-center group cursor-pointer text-decoration-none">
-            <h1 style={{ fontFamily: "var(--font-display)", fontSize: 24, letterSpacing: "0.22em", color: "var(--white)", fontWeight: 500, margin: 0 }}>
-              UNIDRIVE
-            </h1>
-            <span style={{ fontSize: 7, letterSpacing: "0.35em", color: "var(--gold)", marginTop: 4, fontWeight: 500 }}>
-              ADMINISTRATION
-            </span>
-          </Link>
-        </div>
+    <div className="w-full pb-20 animate-in fade-in duration-1000">
+      
+      {/* Header Info */}
+      <div className="mb-16 py-6 pb-4">
+        <div className="text-[#b8965a] font-bold tracking-[0.4em] text-[10px] mb-4 uppercase">FLEET & INVENTORY</div>
+        <h1 className="text-5xl font-serif text-white tracking-wide font-medium">Automotive Portfolio</h1>
+      </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 py-10 flex flex-col gap-2 overflow-y-auto px-6">
-          <SidebarItem 
-            icon={<Icons.Dashboard className="w-5 h-5" />} 
-            label="DASHBOARD" 
-            isActive={activeTab === "overview"} 
-            onClick={() => setActiveTab("overview")} 
-          />
-          <SidebarItem 
-            icon={<Icons.Car className="w-5 h-5" />} 
-            label="VEHICLES" 
-            isActive={activeTab === "vehicles"} 
-            onClick={() => setActiveTab("vehicles")} 
-          />
-          <SidebarItem 
-            icon={<Icons.FileText className="w-5 h-5" />} 
-            label="PRESS & NEWS" 
-            isActive={activeTab === "news"} 
-            onClick={() => setActiveTab("news")} 
-          />
-          <SidebarItem 
-            icon={<Icons.CalendarCheck className="w-5 h-5" />} 
-            label="APPOINTMENTS" 
-            isActive={activeTab === "bookings"} 
-            onClick={() => setActiveTab("bookings")} 
-          />
-        </nav>
-
-        {/* Footer actions */}
-        <div className="p-6 border-t border-[#ffffff15]">
-          <button 
-            onClick={() => setIsLoggedIn(false)}
-            className="flex items-center gap-4 w-full py-3 text-[#5a5a5a] hover:text-[#ffffff] transition-colors"
-            style={{ fontSize: 10, letterSpacing: "0.2em", fontWeight: 500 }}
-          >
-            <Icons.LogOut className="w-4 h-4" />
-            <span>SECURE LOGOUT</span>
-          </button>
-        </div>
-      </aside>
+      {/* Stats Cards Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
+        {[
+          { label: "TOTAL UNITS", val: cars.length, icon: Award, color: "#b8965a" },
+          { label: "AVAILABLE", val: cars.filter(c => c.status === "available").length, icon: TrendingUp, color: "#ffffff" },
+          { label: "RESERVED", val: cars.filter(c => c.status === "reserved").length, icon: Activity, color: "#5a5a5a" },
+          { label: "SOLD OUT", val: cars.filter(c => c.status === "sold").length, icon: XCircle, color: "#b8965a" }
+        ].map((stat, i) => (
+          <div key={i} className="admin-stat-card bg-[#080808] border border-white/5 px-8 py-7 relative group hover:border-[#b8965a]/30 transition-all duration-700">
+            <div className="flex justify-between items-start gap-3 mb-4">
+              <stat.icon size={22} className="admin-stat-icon text-[#333] group-hover:text-[#b8965a] transition-colors duration-700 shrink-0" />
+              <div className="text-[10px] font-bold text-[#333] tracking-[0.2em] leading-none">{String(i+1).padStart(2, '0')}</div>
+            </div>
+            <p className="admin-stat-label text-[#5a5a5a] text-[10px] font-bold uppercase tracking-[0.24em] mb-4">{stat.label}</p>
+            <p className="admin-stat-value text-white font-serif text-4xl leading-none tracking-tight">{stat.val}</p>
+            <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#b8965a] group-hover:w-full transition-all duration-700"></div>
+          </div>
+        ))}
+      </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 bg-[#000000]">
-        
-        {/* Top Header */}
-        <header className="h-25 px-8 md:px-16 lg:px-24 flex items-center justify-between border-b border-[#ffffff15] bg-[#080808]/50 backdrop-blur-md sticky top-0 z-10">
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, letterSpacing: "0.1em", color: "var(--white)", fontWeight: 400, textTransform: "uppercase" }}>
-            {activeTab === 'overview' ? 'DASHBOARD' : activeTab}
-          </h2>
+      <div className="bg-[#080808] border border-white/5 min-w-0">
+        {/* Table Toolbar */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-10 p-10 border-b border-white/5">
+          <div className="flex items-center gap-6">
+             <div className="font-serif text-2xl text-white tracking-wide">Current Inventory</div>
+          </div>
           
           <div className="flex items-center gap-6">
-            <div className="relative">
-              <Icons.Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-[#5a5a5a]" />
+            <div className="admin-toolbar-search relative min-w-0">
+              <Search className="absolute left-0 top-1/2 -translate-y-1/2 text-[#333] group-focus-within:text-[#b8965a] transition-colors" size={16} />
               <input 
                 type="text" 
-                placeholder="SEARCH RECORDS..." 
-                className="pl-12 pr-4 py-3 bg-[#111111] border border-[#ffffff15] text-[#ffffff] focus:outline-none focus:border-[#b8965a] transition-colors w-75"
-                style={{ fontSize: 9, letterSpacing: "0.2em" }}
+                placeholder="FILTER MODELS..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="admin-toolbar-search-input bg-transparent border-b border-white/10 text-[11px] tracking-[0.16em] text-white pl-10 pr-5 py-3 focus:outline-none focus:border-[#b8965a] transition-all w-72 placeholder:text-[#444]"
               />
             </div>
             
-            <div className="w-10 h-10 border border-[#ffffff20] flex items-center justify-center bg-[#111111] hover:border-[#b8965a] transition-colors cursor-pointer">
-              <span style={{ fontFamily: "var(--font-display)", fontSize: 16, color: "var(--gold)" }}>A</span>
-            </div>
-          </div>
-        </header>
-
-        {/* scrollable View */}
-        <div className="flex-1 overflow-y-auto p-8 md:p-16 lg:p-24 custom-scrollbar">
-          <div className="max-w-360 mx-auto">
-            {activeTab === "overview" && <OverviewTab />}
-            {activeTab === "vehicles" && <VehiclesTab />}
-            {activeTab === "news" && <NewsTab />}
-            {activeTab === "bookings" && <BookingsTab />}
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-}
-
-// ─── Shared Components ────────────────────────────────────────────────────────
-
-function SidebarItem({ icon, label, isActive, onClick }: { icon: React.ReactNode, label: string, isActive: boolean, onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className="flex items-center gap-4 w-full px-4 py-4 transition-all duration-300 relative group text-left"
-    >
-      <div className={`transition-colors duration-300 ${isActive ? "text-[#b8965a]" : "text-[#5a5a5a] group-hover:text-[#ffffff]"}`}>
-        {icon}
-      </div>
-      <span 
-        style={{ fontSize: 10, letterSpacing: "0.2em", fontWeight: 500 }}
-        className={`transition-colors duration-300 ${isActive ? "text-[#ffffff]" : "text-[#5a5a5a] group-hover:text-[#ffffff]"}`}
-      >
-        {label}
-      </span>
-      {isActive && (
-        <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[#b8965a]" />
-      )}
-    </button>
-  );
-}
-
-// ─── Views ────────────────────────────────────────────────────────────────────
-
-function LoginView({ onLogin }: { onLogin: () => void }) {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-[#000000] relative overflow-hidden font-sans">
-      
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0 z-0 opacity-40">
-        <Image 
-          src="/Images-home/photo-1503376780353-7e6692767b70.jpg" 
-          alt="Login Background" 
-          fill 
-          style={{ objectFit: 'cover', filter: 'grayscale(100%) contrast(120%)' }}
-          priority
-        />
-        <div className="absolute inset-0 bg-linear-to-t from-[#000000] via-[#000000]/80 to-transparent" />
-      </div>
-
-      <div className="relative z-10 w-full max-w-120 p-10 bg-[#080808]/90 backdrop-blur-md border border-[#ffffff15] shadow-2xl">
-        
-        <div className="mb-12 text-center flex flex-col items-center">
-          <h1 style={{ fontFamily: "var(--font-display)", fontSize: 32, letterSpacing: "0.22em", color: "var(--white)", fontWeight: 500, margin: 0 }}>
-            UNIDRIVE
-          </h1>
-          <span style={{ fontSize: 7, letterSpacing: "0.35em", color: "var(--gold)", marginTop: 6, fontWeight: 500 }}>
-            SECURE PORTAL
-          </span>
-        </div>
-
-        <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); onLogin(); }}>
-          <div className="space-y-3">
-            <label style={{ fontSize: 9, letterSpacing: "0.2em", color: "var(--mid)", textTransform: "uppercase" }}>
-              Administrator Email
-            </label>
-            <input 
-              type="email" 
-              defaultValue="admin@unidrive.com"
-              className="w-full px-5 py-4 bg-[#111111] border border-[#ffffff15] focus:outline-none focus:border-[#b8965a] text-[#ffffff] transition-colors"
-              style={{ fontSize: 11, letterSpacing: "0.05em" }}
-              required
-            />
-          </div>
-          
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <label style={{ fontSize: 9, letterSpacing: "0.2em", color: "var(--mid)", textTransform: "uppercase" }}>
-                Password
-              </label>
-              <a href="#" style={{ fontSize: 9, letterSpacing: "0.1em", color: "var(--dim)", textTransform: "uppercase" }} className="hover:text-[#ffffff] transition-colors">
-                Recover Access
-              </a>
-            </div>
-            <input 
-              type="password" 
-              defaultValue="luxurydrive2026"
-              className="w-full px-5 py-4 bg-[#111111] border border-[#ffffff15] focus:outline-none focus:border-[#b8965a] text-[#ffffff] transition-colors"
-              style={{ fontSize: 11, letterSpacing: "0.05em" }}
-              required
-            />
-          </div>
-
-          <div className="pt-4">
-             <button 
-              type="submit"
-              className="w-full m-btn cursor-pointer py-4"
-              style={{ display: "block", textAlign: "center", width: "100%" }}
+            <button
+              onClick={() => handleOpenModal()}
+              className="admin-primary-cta flex items-center justify-center bg-white hover:bg-[#b8965a] hover:text-white text-black px-7 py-3.5 text-[11px] font-black tracking-[0.16em] transition-all active:scale-95 shrink-0 min-h-[46px]"
             >
-              AUTHENTICATE
+              <Plus size={15} className="mr-3 shrink-0" />
+              ADD VEHICLE
             </button>
           </div>
-        </form>
-        
-        <div className="mt-12 text-center">
-          <Link href="/" className="inline-flex items-center gap-2 text-[#5a5a5a] hover:text-[#ffffff] transition-colors" style={{ fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase" }}>
-            <Icons.LogOut className="w-3 h-3 rotate-180" />
-            RETURN TO SHOWROOM
-          </Link>
+        </div>
+
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm whitespace-nowrap">
+            <thead className="bg-black text-[#444] border-b border-white/5">
+              <tr>
+                <th className="px-6 py-4 text-[9px] font-bold uppercase tracking-[0.3em]">Vehicle & Model</th>
+                <th className="px-6 py-4 text-[9px] font-bold uppercase tracking-[0.3em]">Specifications</th>
+                <th className="px-6 py-4 text-[9px] font-bold uppercase tracking-[0.3em]">Availability</th>
+                <th className="px-6 py-4 text-[9px] font-bold uppercase tracking-[0.3em]">Valuation</th>
+                <th className="px-6 py-4 text-[9px] font-bold uppercase tracking-[0.3em] text-center">Manage</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {loading ? (
+                 <tr>
+                    <td colSpan={5} className="px-6 py-5 text-center">
+                       <Activity className="text-[#b8965a] animate-pulse mx-auto mb-6" size={32} />
+                       <p className="text-[#333] font-bold uppercase tracking-[0.4em] text-[9px]">Initializing Inventory Database</p>
+                    </td>
+                 </tr>
+              ) : filteredCars.map((car) => (
+                <tr key={car.id} className="hover:bg-white/[0.01] transition-all duration-500 group">
+                  <td className="px-6 py-5">
+                    <div className="flex items-center gap-4 min-w-0">
+                      <div className="w-24 h-16 bg-black border border-white/5 overflow-hidden relative transition-all duration-700">
+                         {car.image ? (
+                           <img src={car.image} alt={car.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                         ) : (
+                           <div className="w-full h-full flex items-center justify-center bg-[#050505]"><CarIcon size={20} className="text-[#1a1a1a]" /></div>
+                         )}
+                         <div className="absolute inset-0 border border-white/0 group-hover:border-[#b8965a]/20 transition-all duration-700"></div>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-serif text-xl text-white tracking-wide group-hover:text-[#b8965a] transition-colors duration-500">{car.name}</p>
+                        <p className="text-[9px] text-[#5a5a5a] font-bold uppercase tracking-[0.3em] mt-2">{car.make} • {car.model}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-5">
+                    <div className="flex flex-col gap-3">
+                       <span className="text-white text-[11px] font-medium tracking-widest">
+                          YEAR: {car.year}
+                       </span>
+                       <span className="text-[#444] text-[9px] font-bold uppercase tracking-[0.2em]">{car.fuelType} ENGINE</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-5">
+                    <div className={`inline-flex items-center gap-3 px-0 py-2 text-[9px] font-bold uppercase tracking-[0.25em] ${
+                      car.status === "available" 
+                        ? "text-[#b8965a]" 
+                        : car.status === "reserved" 
+                        ? "text-[#888]" 
+                        : "text-[#444]"
+                    }`}>
+                      <div className={`w-1 h-1 rounded-full ${
+                        car.status === "available" ? "bg-[#b8965a] shadow-[0_0_8px_#b8965a]" 
+                        : "bg-current"
+                      }`} />
+                      {car.status}
+                    </div>
+                  </td>
+                  <td className="px-6 py-5">
+                    <p className="text-white font-serif text-2xl tracking-wide">${car.price.toLocaleString()}</p>
+                    <p className="text-[8px] text-[#333] font-bold uppercase tracking-[0.3em] mt-2">MSRP VALUATION</p>
+                  </td>
+                  <td className="px-6 py-5 text-center">
+                    <div className="flex items-center justify-center gap-6">
+                      <button 
+                        onClick={() => handleOpenModal(car)}
+                        className="text-[#333] hover:text-white transition-colors p-2"
+                      >
+                        <Pencil size={16} />
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(car.id)}
+                        className="text-[#333] hover:text-[#b8965a] transition-colors p-2"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
-    </div>
-  );
-}
 
-function OverviewTab() {
-  const stats = [
-    { label: "TOTAL INVENTORY", value: "42", change: "+3", trend: "up" },
-    { label: "PENDING APPOINTMENTS", value: "12", change: "+2", trend: "up" },
-    { label: "PRESS RELEASES", value: "28", change: "0", trend: "neutral" },
-    { label: "TOTAL INQUIRIES", value: "1,402", change: "+15%", trend: "up" },
-  ];
-
-  return (
-    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, i) => (
-          <div key={i} className="bg-[#080808] border border-[#ffffff15] p-8 relative overflow-hidden group hover:border-[#ffffff30] transition-colors">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-[#b8965a]/5 -mr-4 -mt-4 transition-transform group-hover:scale-110" />
-            
-            <h3 style={{ fontSize: 9, letterSpacing: "0.2em", color: "var(--mid)", marginBottom: 16 }}>{stat.label}</h3>
-            
-            <div className="flex items-end justify-between">
-              <span style={{ fontFamily: "var(--font-display)", fontSize: 42, color: "var(--white)", lineHeight: 1 }}>{stat.value}</span>
-              <span 
-                style={{ fontSize: 10, letterSpacing: "0.1em" }}
-                className={stat.trend === 'up' ? 'text-[#b8965a]' : 'text-[#888888]'}
-              >
-                {stat.change}
-              </span>
+      {/* Modal with sharp luxury style */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/65 flex items-center justify-center p-4 z-[100] animate-in fade-in duration-500">
+          <div className="admin-modal-panel bg-black border border-white/10 w-full max-w-2xl shadow-[0_0_100px_rgba(184,150,90,0.05)]">
+            <div className="admin-modal-header p-10 border-b border-white/5 flex justify-between items-end">
+              <div>
+                <div className="text-[#b8965a] font-bold tracking-[0.4em] text-[8px] mb-4 uppercase">INVENTORY MANAGEMENT</div>
+                <h2 className="text-3xl font-serif text-white tracking-wide">
+                  {editingCarId ? "Update Model" : "Initialize Model"}
+                </h2>
+              </div>
+              <button onClick={handleCloseModal} className="text-[#444] hover:text-white transition-all pb-1 p-2">
+                <XCircle size={20} />
+              </button>
             </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Chart placeholder */}
-        <div className="lg:col-span-2 bg-[#080808] border border-[#ffffff15] p-8 h-100 flex flex-col items-center justify-center text-[#5a5a5a]">
-           <Icons.Dashboard className="w-10 h-10 mb-6 opacity-30" />
-           <p style={{ fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase" }}>Analytics Visualization Node</p>
-        </div>
-        
-        {/* Activity Feed */}
-        <div className="bg-[#080808] border border-[#ffffff15] p-8 h-100 overflow-hidden flex flex-col">
-          <h3 style={{ fontSize: 9, letterSpacing: "0.2em", color: "var(--gold)", marginBottom: 32 }}>RECENT ACTIVITY</h3>
-          
-          <div className="space-y-6 flex-1 overflow-y-auto pr-4 custom-scrollbar">
-            {[
-              { e: "New Test Drive Request", t: "Rolls-Royce Cullinan II", time: "2 HOURS AGO" },
-              { e: "Inventory Updated", t: "Porsche Panamera Carbon", time: "5 HOURS AGO" },
-              { e: "Press Release Published", t: "Mansory Body Kits", time: "1 DAY AGO" },
-              { e: "Inquiry Received", t: "Aston Martin DB12", time: "2 DAYS AGO" },
-              { e: "Vehicle Sold", t: "Mercedes-Maybach S-Class", time: "3 DAYS AGO" },
-            ].map((act, i) => (
-              <div key={i} className="flex gap-4 items-start pb-6 border-b border-[#ffffff05] last:border-0 last:pb-0">
-                <div className="w-1.5 h-1.5 mt-2 bg-[#b8965a] shrink-0" />
-                <div>
-                  <p style={{ fontSize: 12, color: "var(--light)", lineHeight: 1.5 }}>
-                    {act.e}: <span style={{ color: "var(--white)" }}>{act.t}</span>
-                  </p>
-                  <p style={{ fontSize: 8, letterSpacing: "0.15em", color: "var(--dim)", marginTop: 8 }}>{act.time}</p>
+            
+            <form onSubmit={handleSubmit} className="admin-modal-form p-10 space-y-8">
+              <div className="grid grid-cols-2 gap-x-12 gap-y-8">
+                <div className="space-y-3">
+                  <label className="text-[9px] font-bold text-[#444] uppercase tracking-[0.3em] pl-1">Brand</label>
+                  <input type="text" required value={formData.make} onChange={(e) => setFormData({ ...formData, make: e.target.value })} className="w-full !bg-transparent !border-white/10 !border-0 !border-b !rounded-none px-0 py-3 text-[11px] focus:!border-[#b8965a] text-white tracking-widest placeholder:text-[#222]" placeholder="e.g. FERRARI" />
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[9px] font-bold text-[#444] uppercase tracking-[0.3em] pl-1">Model</label>
+                  <input type="text" required value={formData.model} onChange={(e) => setFormData({ ...formData, model: e.target.value })} className="w-full !bg-transparent !border-white/10 !border-0 !border-b !rounded-none px-0 py-3 text-[11px] focus:!border-[#b8965a] text-white tracking-widest" placeholder="e.g. PUROSANGUE" />
+                </div>
+                <div className="col-span-2 space-y-3">
+                  <label className="text-[9px] font-bold text-[#444] uppercase tracking-[0.3em] pl-1">Marketing Title</label>
+                  <input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full !bg-transparent !border-white/10 !border-0 !border-b !rounded-none px-0 py-3 text-[13px] font-serif tracking-wide focus:!border-[#b8965a] text-white" />
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[9px] font-bold text-[#444] uppercase tracking-[0.3em] pl-1">Year</label>
+                  <input type="number" required min={1900} max={2100} value={formData.year} onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })} className="w-full !bg-transparent !border-white/10 !border-0 !border-b !rounded-none px-0 py-3 text-[11px] focus:!border-[#b8965a] text-white" />
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[9px] font-bold text-[#444] uppercase tracking-[0.3em] pl-1">Price (USD)</label>
+                  <input type="number" required min={1} value={formData.price} onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) })} className="w-full !bg-transparent !border-white/10 !border-0 !border-b !rounded-none px-0 py-3 text-[13px] font-serif focus:!border-[#b8965a] text-white" />
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[9px] font-bold text-[#444] uppercase tracking-[0.3em] pl-1">Fuel Type</label>
+                  <select value={formData.fuelType} onChange={(e) => setFormData({ ...formData, fuelType: e.target.value })} className="w-full !bg-transparent !border-white/10 !border-0 !border-b !rounded-none px-0 py-3 text-[11px] focus:!border-[#b8965a] text-white tracking-widest uppercase">
+                    <option value="Petrol" className="bg-black">Petrol</option>
+                    <option value="Electric" className="bg-black">Electric</option>
+                    <option value="Hybrid" className="bg-black">Hybrid</option>
+                  </select>
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[9px] font-bold text-[#444] uppercase tracking-[0.3em] pl-1">Availability</label>
+                  <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className="w-full !bg-transparent !border-white/10 !border-0 !border-b !rounded-none px-0 py-3 text-[11px] focus:!border-[#b8965a] text-white tracking-widest uppercase">
+                    <option value="available" className="bg-black">Available</option>
+                    <option value="reserved" className="bg-black">Reserved</option>
+                    <option value="sold" className="bg-black">Sold Out</option>
+                  </select>
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[9px] font-bold text-[#444] uppercase tracking-[0.3em] pl-1">Body Type</label>
+                  <input type="text" value={formData.body} onChange={(e) => setFormData({ ...formData, body: e.target.value })} className="w-full !bg-transparent !border-white/10 !border-0 !border-b !rounded-none px-0 py-3 text-[11px] focus:!border-[#b8965a] text-white tracking-widest" placeholder="e.g. SUV" />
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[9px] font-bold text-[#444] uppercase tracking-[0.3em] pl-1">Exterior Color</label>
+                  <input type="text" value={formData.color} onChange={(e) => setFormData({ ...formData, color: e.target.value })} className="w-full !bg-transparent !border-white/10 !border-0 !border-b !rounded-none px-0 py-3 text-[11px] focus:!border-[#b8965a] text-white tracking-widest" placeholder="e.g. Black" />
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[9px] font-bold text-[#444] uppercase tracking-[0.3em] pl-1">Mileage</label>
+                  <input type="text" value={formData.mileage} onChange={(e) => setFormData({ ...formData, mileage: e.target.value })} className="w-full !bg-transparent !border-white/10 !border-0 !border-b !rounded-none px-0 py-3 text-[11px] focus:!border-[#b8965a] text-white tracking-widest" placeholder="e.g. New" />
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[9px] font-bold text-[#444] uppercase tracking-[0.3em] pl-1">Fuel Economy (MPG)</label>
+                  <input type="text" value={formData.mpg} onChange={(e) => setFormData({ ...formData, mpg: e.target.value })} className="w-full !bg-transparent !border-white/10 !border-0 !border-b !rounded-none px-0 py-3 text-[11px] focus:!border-[#b8965a] text-white tracking-widest" placeholder="e.g. 18 city / 25 hwy" />
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[9px] font-bold text-[#444] uppercase tracking-[0.3em] pl-1">Trim</label>
+                  <input type="text" value={formData.trim} onChange={(e) => setFormData({ ...formData, trim: e.target.value })} className="w-full !bg-transparent !border-white/10 !border-0 !border-b !rounded-none px-0 py-3 text-[11px] focus:!border-[#b8965a] text-white tracking-widest" placeholder="e.g. Premium Luxury" />
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[9px] font-bold text-[#444] uppercase tracking-[0.3em] pl-1">Badge</label>
+                  <input type="text" value={formData.badge} onChange={(e) => setFormData({ ...formData, badge: e.target.value })} className="w-full !bg-transparent !border-white/10 !border-0 !border-b !rounded-none px-0 py-3 text-[11px] focus:!border-[#b8965a] text-white tracking-widest" placeholder="e.g. New Arrival" />
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[9px] font-bold text-[#444] uppercase tracking-[0.3em] pl-1">Engine</label>
+                  <input type="text" value={formData.engine} onChange={(e) => setFormData({ ...formData, engine: e.target.value })} className="w-full !bg-transparent !border-white/10 !border-0 !border-b !rounded-none px-0 py-3 text-[11px] focus:!border-[#b8965a] text-white tracking-widest" placeholder="e.g. 4.0L Twin-Turbo V8" />
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[9px] font-bold text-[#444] uppercase tracking-[0.3em] pl-1">Transmission</label>
+                  <input type="text" value={formData.transmission} onChange={(e) => setFormData({ ...formData, transmission: e.target.value })} className="w-full !bg-transparent !border-white/10 !border-0 !border-b !rounded-none px-0 py-3 text-[11px] focus:!border-[#b8965a] text-white tracking-widest" placeholder="e.g. 8-Speed Automatic" />
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[9px] font-bold text-[#444] uppercase tracking-[0.3em] pl-1">Drivetrain</label>
+                  <input type="text" value={formData.drivetrain} onChange={(e) => setFormData({ ...formData, drivetrain: e.target.value })} className="w-full !bg-transparent !border-white/10 !border-0 !border-b !rounded-none px-0 py-3 text-[11px] focus:!border-[#b8965a] text-white tracking-widest" placeholder="e.g. AWD" />
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[9px] font-bold text-[#444] uppercase tracking-[0.3em] pl-1">Seats</label>
+                  <input type="number" min={1} value={formData.seats} onChange={(e) => setFormData({ ...formData, seats: parseInt(e.target.value || "1") })} className="w-full !bg-transparent !border-white/10 !border-0 !border-b !rounded-none px-0 py-3 text-[11px] focus:!border-[#b8965a] text-white" />
+                </div>
+                <div className="col-span-2 space-y-3">
+                  <label className="text-[9px] font-bold text-[#444] uppercase tracking-[0.3em] pl-1">Primary Asset URL</label>
+                  <input type="text" value={formData.image} onChange={(e) => setFormData({ ...formData, image: e.target.value })} placeholder="/IMAGES/CARS/MODEL.JPG OR HTTPS://IMAGE-STORAGE.COM/MODEL.JPG" className="w-full !bg-transparent !border-white/10 !border-0 !border-b !rounded-none px-0 py-3 text-[10px] tracking-[0.1em] focus:!border-[#b8965a] text-white" />
+                </div>
+                <div className="col-span-2 space-y-3">
+                  <label className="text-[9px] font-bold text-[#444] uppercase tracking-[0.3em] pl-1">Additional Photos (Comma Separated)</label>
+                  <input
+                    type="text"
+                    value={formData.images}
+                    onChange={(e) => setFormData({ ...formData, images: e.target.value })}
+                    placeholder="HTTPS://.../IMG1.JPG, HTTPS://.../IMG2.JPG, HTTPS://.../IMG3.JPG"
+                    className="w-full !bg-transparent !border-white/10 !border-0 !border-b !rounded-none px-0 py-3 text-[10px] tracking-[0.08em] focus:!border-[#b8965a] text-white placeholder:text-[#333]"
+                  />
+                </div>
+                <div className="col-span-2 space-y-3">
+                  <label className="text-[9px] font-bold text-[#444] uppercase tracking-[0.3em] pl-1">Features (Comma Separated)</label>
+                  <input
+                    type="text"
+                    value={formData.features}
+                    onChange={(e) => setFormData({ ...formData, features: e.target.value })}
+                    placeholder="Adaptive Suspension, Premium Audio, Panoramic Roof"
+                    className="w-full !bg-transparent !border-white/10 !border-0 !border-b !rounded-none px-0 py-3 text-[10px] tracking-[0.08em] focus:!border-[#b8965a] text-white placeholder:text-[#333]"
+                  />
+                </div>
+                <div className="col-span-2 space-y-3">
+                  <label className="text-[9px] font-bold text-[#444] uppercase tracking-[0.3em] pl-1">Description</label>
+                  <textarea
+                    rows={3}
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className="w-full !bg-transparent !border-white/10 !border-0 !border-b !rounded-none px-0 py-3 text-[11px] focus:!border-[#b8965a] text-white tracking-wide resize-none"
+                    placeholder="Short vehicle overview..."
+                  />
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
-function VehiclesTab() {
-  const dummyCars = [
-    { id: "V-9012", name: "ULTRA LUXURY CULLINAN II", make: "Rolls-Royce", price: "POA", status: "AVAILABLE" },
-    { id: "V-9013", name: "PORSCHE PANAMERA CARBON EDITION", make: "Porsche", price: "$285,000", status: "AVAILABLE" },
-    { id: "V-9014", name: "MERCEDES-MAYBACH S-CLASS", make: "Mercedes-Maybach", price: "$320,000", status: "RESERVED" },
-    { id: "V-9015", name: "FERRARI PUROSANGUE SOFT KIT", make: "Ferrari", price: "POA", status: "SOLD OUT" },
-    { id: "V-9016", name: "BMW 8 SERIES WIDEBODY", make: "BMW", price: "$195,000", status: "AVAILABLE" },
-  ];
-
-  return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="flex justify-between items-end border-b border-[#ffffff15] pb-6">
-        <div>
-          <div style={{ fontFamily: "var(--font-body)", fontSize: 9, letterSpacing: "0.3em", color: "var(--gold)", marginBottom: 8 }}>
-            INVENTORY
-          </div>
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 32, letterSpacing: "0.06em", color: "var(--white)", fontWeight: 400 }}>
-            FLEET MANAGEMENT
-          </h2>
-        </div>
-        <button className="m-btn-fill flex items-center gap-2">
-          <Icons.Plus className="w-3 h-3" />
-          ADD VEHICLE
-        </button>
-      </div>
-
-      <div className="bg-[#080808] border border-[#ffffff15]">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-[#111111] border-b border-[#ffffff15]">
-                <th className="px-8 py-6 font-normal" style={{ fontSize: 9, letterSpacing: "0.2em", color: "var(--mid)" }}>REF</th>
-                <th className="px-8 py-6 font-normal" style={{ fontSize: 9, letterSpacing: "0.2em", color: "var(--mid)" }}>MODEL</th>
-                <th className="px-8 py-6 font-normal" style={{ fontSize: 9, letterSpacing: "0.2em", color: "var(--mid)" }}>BRAND</th>
-                <th className="px-8 py-6 font-normal" style={{ fontSize: 9, letterSpacing: "0.2em", color: "var(--mid)" }}>PRICE</th>
-                <th className="px-8 py-6 font-normal" style={{ fontSize: 9, letterSpacing: "0.2em", color: "var(--mid)" }}>STATUS</th>
-                <th className="px-8 py-6 font-normal text-right" style={{ fontSize: 9, letterSpacing: "0.2em", color: "var(--mid)" }}>ACTIONS</th>
-              </tr>
-            </thead>
-            <tbody>
-              {dummyCars.map((car) => (
-                <tr key={car.id} className="border-b border-[#ffffff08] hover:bg-[#ffffff05] transition-colors">
-                  <td className="px-8 py-6" style={{ fontSize: 11, color: "var(--dim)" }}>{car.id}</td>
-                  <td className="px-8 py-6" style={{ fontSize: 12, color: "var(--white)", fontWeight: 500 }}>{car.name}</td>
-                  <td className="px-8 py-6" style={{ fontSize: 11, color: "var(--light)" }}>{car.make}</td>
-                  <td className="px-8 py-6" style={{ fontSize: 12, color: "var(--gold)" }}>{car.price}</td>
-                  <td className="px-8 py-6">
-                    <span 
-                      style={{ fontSize: 8, letterSpacing: "0.15em", padding: "4px 8px" }}
-                      className={`inline-block border ${
-                        car.status === 'AVAILABLE' ? 'border-[#b8965a]/40 text-[#b8965a]' :
-                        car.status === 'SOLD OUT' ? 'border-[#ffffff20] text-[#5a5a5a]' :
-                        'border-[#ffffff50] text-[#ffffff]'
-                      }`}
-                    >
-                      {car.status}
-                    </span>
-                  </td>
-                  <td className="px-8 py-6 text-right space-x-4">
-                    <button className="text-[#5a5a5a] hover:text-[#b8965a] transition-colors"><Icons.Edit /></button>
-                    <button className="text-[#5a5a5a] hover:text-[#ffffff] transition-colors"><Icons.Trash /></button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        
-        {/* Pagination */}
-        <div className="px-8 py-6 border-t border-[#ffffff15] flex items-center justify-between">
-          <span style={{ fontSize: 9, letterSpacing: "0.1em", color: "var(--dim)" }}>SHOWING 1-5 OF 42</span>
-          <div className="flex gap-2">
-            <button className="w-8 h-8 border border-[#ffffff15] flex items-center justify-center text-[#5a5a5a] hover:text-[#ffffff] hover:border-[#ffffff50] transition-colors text-xs">&lt;</button>
-            <button className="w-8 h-8 border border-[#b8965a] flex items-center justify-center text-[#b8965a] text-xs">1</button>
-            <button className="w-8 h-8 border border-[#ffffff15] flex items-center justify-center text-[#5a5a5a] hover:text-[#ffffff] hover:border-[#ffffff50] transition-colors text-xs">2</button>
-            <button className="w-8 h-8 border border-[#ffffff15] flex items-center justify-center text-[#5a5a5a] hover:text-[#ffffff] hover:border-[#ffffff50] transition-colors text-xs">3</button>
-            <button className="w-8 h-8 border border-[#ffffff15] flex items-center justify-center text-[#5a5a5a] hover:text-[#ffffff] hover:border-[#ffffff50] transition-colors text-xs">&gt;</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function NewsTab() {
-  const dummyNews = [
-    { id: 1, title: "THE FERRARI PUROSANGUE SOFT KIT", date: "FEBRUARY 13, 2026", cat: "BODY KITS", status: "PUBLISHED" },
-    { id: 2, title: "PORSCHE TAYCAN TURBO S ARRIVES", date: "JANUARY 28, 2026", cat: "NEWS", status: "DRAFT" },
-    { id: 3, title: "CULLINAN SERIES II — LINEA D'ARABO COLLECTION", date: "JANUARY 09, 2026", cat: "ATELIER", status: "PUBLISHED" },
-  ];
-
-  return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="flex justify-between items-end border-b border-[#ffffff15] pb-6">
-        <div>
-          <div style={{ fontFamily: "var(--font-body)", fontSize: 9, letterSpacing: "0.3em", color: "var(--gold)", marginBottom: 8 }}>
-            PRESS
-          </div>
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 32, letterSpacing: "0.06em", color: "var(--white)", fontWeight: 400 }}>
-            NEWS & RELEASES
-          </h2>
-        </div>
-        <button className="m-btn-fill flex items-center gap-2">
-          <Icons.Plus className="w-3 h-3" />
-          NEW ARTICLE
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {dummyNews.map(news => (
-          <div key={news.id} className="bg-[#080808] border border-[#ffffff15] p-8 group hover:border-[#ffffff30] transition-colors flex flex-col justify-between h-70">
-            <div>
-               <div className="flex justify-between items-start mb-6">
-                <span style={{ fontSize: 9, letterSpacing: "0.2em", color: "var(--dim)" }}>{news.date}</span>
-                <span 
-                  style={{ fontSize: 8, letterSpacing: "0.15em", padding: "4px 8px" }}
-                  className={`inline-block border ${
-                    news.status === 'PUBLISHED' ? 'border-[#b8965a]/40 text-[#b8965a]' : 'border-[#ffffff20] text-[#5a5a5a]'
-                  }`}
-                >
-                  {news.status}
-                </span>
+              <div className="pt-8 flex justify-end gap-8">
+                <button type="button" onClick={handleCloseModal} className="admin-modal-secondary-btn text-[10px] font-bold uppercase tracking-[0.24em] text-[#444] hover:text-white transition-all">
+                  DISCARD
+                </button>
+                <button type="submit" className="admin-modal-primary-btn text-[10px] font-bold uppercase tracking-[0.24em] text-[#b8965a] hover:text-white transition-all">
+                  {editingCarId ? "COMMIT UPDATES" : "INITIALIZE ASSET"}
+                </button>
               </div>
-              <h3 style={{ fontFamily: "var(--font-body)", fontSize: 18, fontWeight: 300, color: "var(--white)", lineHeight: 1.4 }}>
-                {news.title}
-              </h3>
-            </div>
-           
-            <div className="flex justify-between items-center mt-6 pt-6 border-t border-[#ffffff10]">
-               <span style={{ fontSize: 9, letterSpacing: "0.2em", color: "var(--gold)" }}>{news.cat}</span>
-               <div className="flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button className="text-[#5a5a5a] hover:text-[#b8965a] transition-colors"><Icons.Edit /></button>
-                <button className="text-[#5a5a5a] hover:text-[#ffffff] transition-colors"><Icons.Trash /></button>
-              </div>
-            </div>
+            </form>
           </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function BookingsTab() {
-  const dummyBookings = [
-    { id: "AP-1029", name: "Alexander Sterling", car: "BMW M8 COMPETITION", date: "TOMORROW, 10:00 AM", status: "CONFIRMED" },
-    { id: "AP-1030", name: "Victoria Chase", car: "FERRARI PUROSANGUE", date: "OCT 28, 2:30 PM", status: "PENDING" },
-    { id: "AP-1031", name: "Marcus Wright", car: "PORSCHE PANAMERA", date: "OCT 29, 11:00 AM", status: "PENDING" },
-    { id: "AP-1028", name: "Eleanor Vance", car: "MAYBACH S-CLASS", date: "TODAY, 4:00 PM", status: "COMPLETED" },
-  ];
-
-  return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="flex justify-between items-end border-b border-[#ffffff15] pb-6">
-        <div>
-          <div style={{ fontFamily: "var(--font-body)", fontSize: 9, letterSpacing: "0.3em", color: "var(--gold)", marginBottom: 8 }}>
-            CLIENTS
-          </div>
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 32, letterSpacing: "0.06em", color: "var(--white)", fontWeight: 400 }}>
-            APPOINTMENTS
-          </h2>
         </div>
-      </div>
-
-       <div className="bg-[#080808] border border-[#ffffff15]">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-[#111111] border-b border-[#ffffff15]">
-                <th className="px-8 py-6 font-normal" style={{ fontSize: 9, letterSpacing: "0.2em", color: "var(--mid)" }}>REF</th>
-                <th className="px-8 py-6 font-normal" style={{ fontSize: 9, letterSpacing: "0.2em", color: "var(--mid)" }}>CLIENT</th>
-                <th className="px-8 py-6 font-normal" style={{ fontSize: 9, letterSpacing: "0.2em", color: "var(--mid)" }}>MODEL OF INTEREST</th>
-                <th className="px-8 py-6 font-normal" style={{ fontSize: 9, letterSpacing: "0.2em", color: "var(--mid)" }}>SCHEDULE</th>
-                <th className="px-8 py-6 font-normal" style={{ fontSize: 9, letterSpacing: "0.2em", color: "var(--mid)" }}>STATUS</th>
-                <th className="px-8 py-6 font-normal text-right" style={{ fontSize: 9, letterSpacing: "0.2em", color: "var(--mid)" }}>ACTIONS</th>
-              </tr>
-            </thead>
-            <tbody>
-              {dummyBookings.map((booking) => (
-                <tr key={booking.id} className="border-b border-[#ffffff08] hover:bg-[#ffffff05] transition-colors">
-                  <td className="px-8 py-6" style={{ fontSize: 11, color: "var(--dim)" }}>{booking.id}</td>
-                  <td className="px-8 py-6" style={{ fontSize: 12, color: "var(--white)", fontWeight: 500 }}>{booking.name}</td>
-                  <td className="px-8 py-6" style={{ fontSize: 11, color: "var(--light)" }}>{booking.car}</td>
-                  <td className="px-8 py-6">
-                     <span style={{ fontSize: 10, letterSpacing: "0.05em", color: "var(--mid)" }}>{booking.date}</span>
-                  </td>
-                  <td className="px-8 py-6">
-                    <span 
-                      style={{ fontSize: 8, letterSpacing: "0.15em", padding: "4px 8px" }}
-                      className={`inline-block border ${
-                        booking.status === 'CONFIRMED' ? 'border-[#b8965a]/40 text-[#b8965a]' :
-                        booking.status === 'COMPLETED' ? 'border-[#ffffff30] text-[#ffffff]' :
-                        'border-[#ffffff10] text-[#5a5a5a]'
-                      }`}
-                    >
-                      {booking.status}
-                    </span>
-                  </td>
-                  <td className="px-8 py-6 text-right">
-                    <button className="m-btn py-2 px-4">
-                      MANAGE
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
