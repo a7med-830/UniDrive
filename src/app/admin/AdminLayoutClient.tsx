@@ -34,6 +34,7 @@ export default function AdminLayoutClient({
     { name: "Dashboard",    path: "/admin",              icon: LayoutDashboard },
     { name: "Car Listing",  path: "/admin/cars",         icon: Car },
     { name: "Appointments", path: "/admin/appointments", icon: Calendar },
+    { name: "News & Events", path: "/admin/news",        icon: MessageSquare },
   ];
 
   const bottomNav = [

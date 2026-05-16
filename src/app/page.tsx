@@ -197,29 +197,7 @@ const cars = [
   { id: 4,  img: "/Ferrari/Ferrari Purosangue/photo1.jpg", title: "Ferrari PUROSANGUE", tag: "NEW" },
   { id: 34, img: "/Images-home/3e9b06168ed4cb828e16b2a348724f20.jpg", title: "Range Rover", tag: "NEW" },
 ];
-
-// ─── NEWS DATA ────────────────────────────────────────────────────────────────
-const news = [
-  {
-    img: "/Images-home/photo-1514867644123-6385d58d3cd4.jpg",
-    date: "FEBRUARY 13, 2026",
-    title: "THE FERRARI PUROSANGUE SOFT KIT",
-    cat: "BODY KITS",
-  },
-  {
-    img: "/Images-home/7e34ae620a79e76916992147175aa522.jpg",
-    date: "JANUARY 28, 2026",
-    title: "Porsche Taycan Turbo S",
-    cat: "NEWS",
-  },
-  {
-    img: "/Images-home/bef83415d0cba15db605a5d1294e3771.jpg",
-    date: "JANUARY 09, 2026",
-    title: "CULLINAN SERIES II — LINEA D'ARABO COLLECTION",
-    cat: "ATELIER",
-  },
-];
-
+// ─── STATIC DATA REMOVED (news fetched dynamically) ──────────────────────────
 // ─── SVG ICONS ────────────────────────────────────────────────────────────────
 const SearchIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -651,6 +629,28 @@ function LatestCarousel() {
 // ─── NEWS & EVENTS ────────────────────────────────────────────────────────────
 function NewsSection() {
   const ref = useReveal();
+  const [newsList, setNewsList] = useState<any[]>([]);
+  const [showAllModal, setShowAllModal] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/news")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setNewsList(data);
+      })
+      .catch((err) => console.error("Error fetching news:", err));
+  }, []);
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString("en-US", {
+      month: "long",
+      day: "2-digit",
+      year: "numeric"
+    }).toUpperCase();
+  };
+
+  const topNews = newsList.slice(0, 3);
+
   return (
     <section style={{ background: "var(--dark2)", padding: "clamp(80px, 12vw, 100px) clamp(16px, 5vw, 40px)" }}>
       <div style={{ maxWidth: 1360, margin: "0 auto" }}>
@@ -662,43 +662,109 @@ function NewsSection() {
               NEWS & EVENTS
             </h2>
           </div>
-          <a href="#" className="btn-outline" style={{ fontSize: 9, color: "#ffffff" }}>SEE ALL</a>
+          {newsList.length > 3 && (
+            <button 
+              onClick={() => setShowAllModal(true)} 
+              className="btn-outline" 
+              style={{ fontSize: 9, color: "#ffffff", background: "transparent", cursor: "pointer" }}
+            >
+              SEE ALL
+            </button>
+          )}
         </div>
 
         <div>
-          {news.map((item, i) => (
-            <div key={i} className="news-item" style={{ display: "flex", alignItems: "center", gap: 28, padding: "28px 0", cursor: "pointer", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-              
-              
-              <div style={{ flex: "0 0 200px", height: 130, overflow: "hidden" }}>
-                <img src={item.img} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "transform 0.6s ease" }} />
-              </div>
-              
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", gap: 16, marginBottom: 8, flexWrap: "wrap" }}>
-                  <span style={{ fontFamily: "var(--font-body)", fontSize: 9, letterSpacing: "0.2em", color: "var(--text-dim)", fontWeight: 400 }}>
-                    {item.date}
-                  </span>
-                  <span style={{ fontFamily: "var(--font-body)", fontSize: 9, letterSpacing: "0.2em", color: "var(--gold)", fontWeight: 500 }}>
-                    {item.cat}
-                  </span>
+          {topNews.length === 0 ? (
+            <div style={{ color: "var(--text-dim)", fontSize: 13, fontFamily: "var(--font-body)", letterSpacing: "0.08em" }}>No recent news.</div>
+          ) : (
+            topNews.map((item, i) => (
+              <div key={item.id || i} className="news-item" style={{ display: "flex", alignItems: "center", gap: 28, padding: "28px 0", cursor: "pointer", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                
+                <div style={{ flex: "0 0 200px", height: 130, overflow: "hidden" }}>
+                  <img src={item.image || "/Images-home/photo-1514867644123-6385d58d3cd4.jpg"} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "transform 0.6s ease" }} />
                 </div>
                 
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", gap: 16, marginBottom: 8, flexWrap: "wrap" }}>
+                    <span style={{ fontFamily: "var(--font-body)", fontSize: 9, letterSpacing: "0.2em", color: "var(--text-dim)", fontWeight: 400 }}>
+                      {formatDate(item.publishedAt)}
+                    </span>
+                    <span style={{ fontFamily: "var(--font-body)", fontSize: 9, letterSpacing: "0.2em", color: "var(--gold)", fontWeight: 500 }}>
+                      {item.category || "NEWS"}
+                    </span>
+                  </div>
+                  
+                  <h3 className="news-title" style={{ fontFamily: "var(--font-body)", fontSize: "clamp(14px, 1.8vw, 18px)", fontWeight: 500, letterSpacing: "0.08em", color: "#ffffff" }}>
+                    {item.title}
+                  </h3>
+                </div>
                 
-                <h3 className="news-title" style={{ fontFamily: "var(--font-body)", fontSize: "clamp(14px, 1.8vw, 18px)", fontWeight: 500, letterSpacing: "0.08em", color: "#ffffff" }}>
-                  {item.title}
-                </h3>
+                <div style={{ flex: "0 0 auto", color: "#ffffff" }}>
+                  <ChevronRight />
+                </div>
+                
               </div>
-              
-          
-              <div style={{ flex: "0 0 auto", color: "#ffffff" }}>
-                <ChevronRight />
-              </div>
-              
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
+
+      {/* SEE ALL MODAL */}
+      {showAllModal && (
+        <div 
+          onClick={() => setShowAllModal(false)}
+          style={{
+            position: "fixed", top: 0, left: 0, right: 0, bottom: 0, 
+            background: "rgba(0, 0, 0, 0.8)", backdropFilter: "blur(8px)",
+            zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "20px"
+          }}
+        >
+          <div 
+            onClick={e => e.stopPropagation()}
+            style={{ 
+              background: "#121212", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 16,
+              maxWidth: 900, width: "100%", maxHeight: "85vh", display: "flex", flexDirection: "column",
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)"
+            }}
+          >
+            {/* Header */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "32px 40px 24px", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+              <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, letterSpacing: "0.1em", color: "#fff", fontWeight: 500, margin: 0 }}>ALL NEWS & EVENTS</h2>
+              <button onClick={() => setShowAllModal(false)} style={{ background: "transparent", border: "none", color: "var(--text-dim)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 8, transition: "color 0.2s" }} onMouseOver={e => e.currentTarget.style.color = "#fff"} onMouseOut={e => e.currentTarget.style.color = "var(--text-dim)"}>
+                <CloseIcon />
+              </button>
+            </div>
+            
+            {/* Scrollable Content */}
+            <div style={{ padding: "0 40px 40px", overflowY: "auto" }}>
+              {newsList.map((item, i) => (
+                <div key={item.id || i} className="news-item" style={{ display: "flex", alignItems: "center", gap: 28, padding: "28px 0", cursor: "pointer", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                  <div style={{ flex: "0 0 200px", height: 130, overflow: "hidden" }}>
+                    <img src={item.image || "/Images-home/photo-1514867644123-6385d58d3cd4.jpg"} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "transform 0.6s ease" }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", gap: 16, marginBottom: 8, flexWrap: "wrap" }}>
+                      <span style={{ fontFamily: "var(--font-body)", fontSize: 9, letterSpacing: "0.2em", color: "var(--text-dim)", fontWeight: 400 }}>
+                        {formatDate(item.publishedAt)}
+                      </span>
+                      <span style={{ fontFamily: "var(--font-body)", fontSize: 9, letterSpacing: "0.2em", color: "var(--gold)", fontWeight: 500 }}>
+                        {item.category || "NEWS"}
+                      </span>
+                    </div>
+                    <h3 className="news-title" style={{ fontFamily: "var(--font-body)", fontSize: "clamp(14px, 1.8vw, 18px)", fontWeight: 500, letterSpacing: "0.08em", color: "#ffffff" }}>
+                      {item.title}
+                    </h3>
+                  </div>
+                  <div style={{ flex: "0 0 auto", color: "#ffffff" }}>
+                    <ChevronRight />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
