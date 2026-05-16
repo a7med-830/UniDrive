@@ -263,7 +263,13 @@ function InventoryContent() {
       <div style={{ maxWidth: 1440, margin: "0 auto", padding: "48px 48px", display: "flex", gap: 48, alignItems: "flex-start" }}>
 
         {/* ── SIDEBAR ─────────────────────────────────────────────────────── */}
-        <aside style={{ width: 220, flexShrink: 0, position: "sticky", top: 88 }} className="m-desktop">
+        <aside style={{ width: 220, flexShrink: 0, position: "sticky", top: 88, height: "calc(100vh - 108px)", overflowY: "auto", paddingRight: 8 }} className="m-desktop">
+          <style>{`
+            aside::-webkit-scrollbar { width: 3px; }
+            aside::-webkit-scrollbar-track { background: transparent; }
+            aside::-webkit-scrollbar-thumb { background: var(--border2, #333); border-radius: 2px; }
+            aside::-webkit-scrollbar-thumb:hover { background: var(--dim, #555); }
+          `}</style>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 20 }}>
             <span style={{ fontFamily: "var(--serif)", fontSize: 14, letterSpacing: "0.10em", fontWeight: 400 }}>FILTER</span>
             {activeFilters.length > 0 && (
