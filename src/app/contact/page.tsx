@@ -448,35 +448,37 @@ export default function ContactPage() {
           }
         `}</style>
         
-        {/* ── INFO PANEL ────────────────────────────────────────────────────── */}
-        <div style={{ background: "var(--dark1)", border: "1px solid var(--border)", padding: "clamp(28px, 6vw, 48px) clamp(20px, 5vw, 40px)", display: "flex", flexDirection: "column", gap: "clamp(24px, 5vw, 40px)" }}>
-          <div style={{ fontFamily: "var(--serif)", fontSize: 24, letterSpacing: "0.1em", color: "var(--white)" }}>
-            UNIDRIVE HEADQUARTERS
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
-            <div style={{ display: "flex", gap: 20 }}>
-              <div style={{ color: "var(--gold)", marginTop: 2 }}><LocationIcon /></div>
-              <div>
-                <div style={{ fontSize: 10, letterSpacing: "0.2em", color: "var(--dim)", textTransform: "uppercase", marginBottom: 8, fontWeight: 500 }}>Address</div>
-                <div style={{ fontSize: 13, color: "var(--mid)", lineHeight: 1.6, fontWeight: 300 }}>
-                  128 Automotive Avenue<br />
-                  Beverly Hills<br />
-                  CA 90210, USA
+      {/* ── INFO PANEL ────────────────────────────────────────────────────── */}
+              <div style={{ background: "var(--dark1)", border: "1px solid var(--border)", padding: "clamp(28px, 6vw, 48px) clamp(20px, 5vw, 40px)", display: "flex", flexDirection: "column", gap: "clamp(24px, 5vw, 40px)" }}>
+                <div style={{ fontFamily: "var(--serif)", fontSize: 24, letterSpacing: "0.1em", color: "var(--white)" }}>
+                  UNIDRIVE HEADQUARTERS
+                </div>
+              
+                <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
+                  <div style={{ display: "flex", gap: 20 }}>
+                    <div style={{ color: "var(--gold)", marginTop: 2 }}><LocationIcon /></div>
+                    <div>
+                      <div style={{ fontSize: 10, letterSpacing: "0.2em", color: "var(--dim)", textTransform: "uppercase", marginBottom: 8, fontWeight: 500 }}>Address</div>
+                      <div style={{ fontSize: 13, color: "var(--mid)", lineHeight: 1.6, fontWeight: 300 }}>
+                        15 South Teseen Street<br />
+                        5th Settlement, New Cairo<br />
+                        Cairo, Egypt
+                      </div>
+                    </div>
+                  </div>
+              
+                  <div style={{ display: "flex", gap: 20 }}>
+                    <div style={{ color: "var(--gold)", marginTop: 2 }}><PhoneIcon /></div>
+                    <div>
+                      <div style={{ fontSize: 10, letterSpacing: "0.2em", color: "var(--dim)", textTransform: "uppercase", marginBottom: 8, fontWeight: 500 }}>Phone</div>
+                      <div style={{ fontSize: 13, color: "var(--white)", lineHeight: 1.6, fontWeight: 300 }}>
+                        <span style={{ color: "var(--mid)" }}>Sales:</span> +20 10 1234 5678<br />
+                        <span style={{ color: "var(--mid)" }}>Service:</span> 16500 
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <div style={{ display: "flex", gap: 20 }}>
-              <div style={{ color: "var(--gold)", marginTop: 2 }}><PhoneIcon /></div>
-              <div>
-                <div style={{ fontSize: 10, letterSpacing: "0.2em", color: "var(--dim)", textTransform: "uppercase", marginBottom: 8, fontWeight: 500 }}>Phone</div>
-                <div style={{ fontSize: 13, color: "var(--white)", lineHeight: 1.6, fontWeight: 300 }}>
-                  <span style={{ color: "var(--mid)" }}>Sales:</span> +1 (800) 555-0199<br />
-                  <span style={{ color: "var(--mid)" }}>Service:</span> +1 (800) 555-0198
-                </div>
-              </div>
-            </div>
 
             <div style={{ display: "flex", gap: 20 }}>
               <div style={{ color: "var(--gold)", marginTop: 2 }}><EmailIcon /></div>
