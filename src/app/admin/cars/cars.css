@@ -465,10 +465,19 @@
 
 .inv-loading-icon {
   color: var(--inv-gold);
-  animation: pulse 1.5s ease-in-out infinite;
+  animation: inv-glow 1.6s ease-in-out infinite;
 }
 
-@keyframes pulse { 0%,100% { opacity:0.4; } 50% { opacity:1; } }
+@keyframes inv-glow {
+  0%, 100% {
+    opacity: 0.4;
+    filter: drop-shadow(0 0 0 rgba(184, 150, 90, 0));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 14px rgba(184, 150, 90, 0.9));
+  }
+}
 
 .inv-loading-text {
   font-size: 10px;

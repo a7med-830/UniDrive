@@ -14,7 +14,7 @@ type Stats = {
   inventory: { total: number; available: number; reserved: number; sold: number; totalValue: number };
   inquiries: { total: number; new: number };
   contactMessages: { total: number; recent: { id: number; name: string; email: string; phone: string | null; message: string; createdAt: string }[] };
-  appointments: { total: number; pending: number; upcoming: { id: number; clientName: string; scheduledAt: string; status: string; car: { name: string; make: string; model: string; image: string | null } }[] };
+  appointments: { total: number; pending: number; upcoming: { id: number; clientName: string; scheduledAt: string; status: string; car: { name: string; make: string; model: string; image: string | null } | null }[] };
   revenue: { thisMonth: number; lastMonth: number; growth: number; soldThisMonth: number };
   recentInquiries: { id: number; name: string; email: string; createdAt: string; status: string; car: { name: string; make: string; image: string | null } }[];
   recentCars: { id: number; name: string; make: string; model: string; year: number; price: number; status: string; fuelType: string; image: string | null; createdAt: string }[];
@@ -259,11 +259,11 @@ export default function AdminDashboard() {
                       <tr key={a.id}>
                         <td>
                           <div className="dash-car-cell">
-                            {a.car.image
+                            {a.car?.image
                               ? <img src={a.car.image} alt={a.car.name} className="dash-car-thumb" />
                               : <div className="dash-car-thumb-placeholder"><CarIcon size={14} /></div>
                             }
-                            <span className="dash-car-name">{a.car.name}</span>
+                            <span className="dash-car-name">{a.car?.name ?? "General appointment"}</span>
                           </div>
                         </td>
                         <td style={{ color: "var(--d-text)", fontSize: 13 }}>{a.clientName}</td>

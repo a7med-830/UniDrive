@@ -108,8 +108,10 @@ export default function MessagesPage() {
               {loading ? (
                 <tr>
                   <td colSpan={4} style={{ padding: "80px 0", textAlign: "center" }}>
-                    <Activity className="inv-loading-icon" size={32} style={{ animation: "spin 2s linear infinite", margin: "0 auto 16px", color: "var(--inv-gold)" }} />
-                    <p className="inv-loading-text">Loading messages</p>
+                    <div className="inv-loading">
+                      <Activity size={32} className="inv-loading-icon" />
+                      <p className="inv-loading-text">Loading messages</p>
+                    </div>
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (

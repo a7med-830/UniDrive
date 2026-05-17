@@ -772,16 +772,22 @@
 }
 
 .dash-loading-dot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: var(--d-gold);
-  animation: dashLoadPulse 1.2s ease-in-out infinite;
+  animation: dashLoadGlow 1.6s ease-in-out infinite;
 }
 
-@keyframes dashLoadPulse {
-  0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
-  40%           { transform: scale(1.1); opacity: 1; }
+@keyframes dashLoadGlow {
+  0%, 100% {
+    opacity: 0.35;
+    box-shadow: 0 0 0 rgba(184, 150, 90, 0);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 16px rgba(184, 150, 90, 0.95);
+  }
 }
 
 .dash-loading-text {
