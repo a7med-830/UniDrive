@@ -255,7 +255,7 @@ export default function AdminNews() {
                     value={newsTitle} onChange={e => setNewsTitle(e.target.value)} />
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+                <div className="inv-form-grid" style={{ gap: 24 }}>
                   <div className="inv-field">
                     <label style={lbl}>Category</label>
                     <input type="text" placeholder="e.g. BODY KITS" style={inp}

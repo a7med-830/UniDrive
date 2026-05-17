@@ -1,0 +1,107 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table Car {
+  id Int [pk, increment]
+  name String [not null]
+  make String [not null]
+  model String [not null]
+  year Int [not null]
+  price Int [not null]
+  body String
+  color String
+  mileage String
+  mpg String
+  fuelType String [not null]
+  image String
+  images String[] [not null]
+  badge String
+  trim String
+  engine String
+  transmission String
+  drivetrain String
+  seats Int
+  description String
+  features String[] [not null]
+  status String [not null, default: 'available']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  inquiries Inquiry [not null]
+  appointments Appointment [not null]
+  bookings Booking [not null]
+}
+
+Table Inquiry {
+  id Int [pk, increment]
+  carId Int [not null]
+  car Car [not null]
+  name String [not null]
+  email String [not null]
+  phone String
+  message String
+  preferredDate DateTime
+  status String [not null, default: 'new']
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table ContactMessage {
+  id Int [pk, increment]
+  name String [not null]
+  email String [not null]
+  phone String
+  message String [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table Appointment {
+  id Int [pk, increment]
+  carId Int
+  car Car
+  clientName String [not null]
+  clientEmail String
+  scheduledAt DateTime [not null]
+  status String [not null, default: 'pending']
+  bookingType String
+  contactMethod String
+  notes String
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table NewsArticle {
+  id Int [pk, increment]
+  title String [not null]
+  image String
+  category String
+  publishedAt DateTime [default: `now()`, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Booking {
+  id Int [pk, increment]
+  car Car [not null]
+  carId Int [not null]
+  user User [not null]
+  userId Int [not null]
+  date DateTime [not null]
+  status String [not null, default: 'pending']
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table User {
+  id Int [pk, increment]
+  name String [not null]
+  email String [unique, not null]
+  password String [not null]
+  role String [not null, default: 'user']
+  bookings Booking [not null]
+}
+
+Ref: Inquiry.carId > Car.id
+
+Ref: Appointment.carId > Car.id
+
+Ref: Booking.carId > Car.id
+
+Ref: Booking.userId > User.id

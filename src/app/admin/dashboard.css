@@ -835,6 +835,42 @@
   .dash-dual-row {
     grid-template-columns: 1fr;
   }
+
+  /* Leave space for the hamburger button */
+  .dash-navbar {
+    padding-left: 68px;
+  }
+
+  /* Hide search bar to save space on small screens */
+  .dash-search-wrap {
+    display: none;
+  }
+
+  .dash-navbar-title {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dash-kpi-row {
+    grid-template-columns: 1fr;
+  }
+
+  .dash-kpi-value {
+    font-size: 24px;
+  }
+
+  .dash-body {
+    padding: 12px;
+    gap: 12px;
+    /* Ensure last card is visible above mobile browser bottom bar */
+    padding-bottom: 80px;
+  }
+
+  .dash-table thead th:nth-child(n+3),
+  .dash-table tbody td:nth-child(n+3) {
+    display: none;
+  }
 }
 
 /* ── KPI Cards Row ──────────────────────────────────────────────────────── */

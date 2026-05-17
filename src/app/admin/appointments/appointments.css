@@ -152,3 +152,35 @@
   from { transform: translateX(100%); }
   to { transform: translateX(0); }
 }
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .appt-detail-panel {
+    width: 100vw;
+  }
+
+  .appt-detail-head {
+    padding: 16px 18px;
+  }
+
+  .appt-detail-body {
+    padding: 16px 18px;
+    gap: 14px;
+  }
+
+  .appt-detail-actions {
+    padding: 14px 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .appt-detail-actions {
+    flex-direction: column;
+  }
+
+  .appt-quick-btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+}

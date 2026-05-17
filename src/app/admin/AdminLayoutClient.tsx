@@ -15,6 +15,8 @@ import {
   LogOut,
   BarChart2,
   Calendar,
+  Menu,
+  X,
 } from "lucide-react";
 import "./sidebar.css";
 
@@ -27,6 +29,12 @@ export default function AdminLayoutClient({
 }) {
   const pathname = usePathname();
   const [isHelpOpen, setIsHelpOpen] = React.useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+
+  // Close sidebar when navigating
+  React.useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [pathname]);
 
   if (pathname === "/admin/login") return <>{children}</>;
 
@@ -75,8 +83,23 @@ export default function AdminLayoutClient({
 
   return (
     <div className="admin-root sb-shell">
+      {/* ── Mobile Hamburger Button ── */}
+      <button
+        className="sb-hamburger"
+        onClick={() => setIsSidebarOpen(true)}
+        aria-label="Open navigation menu"
+      >
+        <Menu size={20} />
+      </button>
+
+      {/* ── Mobile Overlay ── */}
+      <div
+        className={`sb-overlay${isSidebarOpen ? " sb-overlay--visible" : ""}`}
+        onClick={() => setIsSidebarOpen(false)}
+      />
+
       {/* ── Sidebar ── */}
-      <aside className="sb-sidebar">
+      <aside className={`sb-sidebar${isSidebarOpen ? " sb-sidebar--open" : ""}`}>
         {/* Logo */}
         <Link href="/" className="sb-logo">
           <div className="sb-logo-inner">

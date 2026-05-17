@@ -6,7 +6,8 @@
 /* ── Shell ────────────────────────────────────────────────────────────────── */
 .sb-shell {
   display: flex;
-  height: 100vh;
+  height: 100vh;           /* fallback */
+  height: 100dvh;          /* dynamic viewport — excludes mobile browser chrome */
   overflow: hidden; /* clips the outer shell only */
   background: #000000;
   color: #ffffff;
@@ -21,7 +22,8 @@
   border-right: 1px solid rgba(255,255,255,0.07);
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 100vh;    /* fallback */
+  height: 100dvh;   /* exclude mobile browser chrome */
   overflow: hidden;
   z-index: 30;
   flex-shrink: 0;
@@ -256,6 +258,8 @@
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  /* Ensure content is not hidden under mobile browser bottom bar */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .sb-content::-webkit-scrollbar { width: 4px; }
@@ -270,6 +274,46 @@
   min-width: unset;
 }
 
+/* ── Mobile Hamburger Button ──────────────────────────────────────────────── */
+.sb-hamburger {
+  display: none;
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 1000;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #08080a;
+  border: 1px solid rgba(255,255,255,0.1);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #ffffff;
+  transition: border-color 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+
+.sb-hamburger:hover {
+  border-color: #b8965a;
+  color: #b8965a;
+}
+
+/* ── Mobile Sidebar Overlay ───────────────────────────────────────────────── */
+.sb-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 40;
+  animation: sbOverlayIn 0.25s ease;
+}
+
+@keyframes sbOverlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
 @media (max-width: 768px) {
   .admin-root button,
   .admin-root a {
@@ -277,9 +321,43 @@
     min-width: unset !important;
   }
 
+  /* Show hamburger */
+  .sb-hamburger {
+    display: flex;
+  }
+
+  /* Sidebar: hidden off-screen by default */
   .sb-sidebar {
-    width: 200px;
-    min-width: 200px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 260px;
+    min-width: 260px;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 50;
+    box-shadow: 4px 0 40px rgba(0,0,0,0.8);
+  }
+
+  /* Sidebar open state */
+  .sb-sidebar--open {
+    transform: translateX(0);
+  }
+
+  /* Show overlay when sidebar is open */
+  .sb-overlay--visible {
+    display: block;
+  }
+
+  /* Content takes full width */
+  .sb-shell {
+    flex-direction: column;
+  }
+
+  .sb-content {
+    width: 100%;
+    padding-top: 0;
   }
 
   .sb-logo-text { font-size: 17px; }

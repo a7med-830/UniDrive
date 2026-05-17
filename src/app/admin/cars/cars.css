@@ -699,15 +699,47 @@
 }
 
 @media (max-width: 768px) {
-  .inv-root { padding: 16px; gap: 16px; }
+  .inv-root { padding: 16px 16px 16px 16px; gap: 16px; }
   .inv-stats-grid { grid-template-columns: 1fr 1fr; }
   .inv-header-title { font-size: 28px; }
   .inv-table thead th:nth-child(n+4),
   .inv-table tbody td:nth-child(n+4) { display: none; }
   .inv-form-grid { grid-template-columns: 1fr; }
   .inv-field--full { grid-column: 1; }
+
+  /* Leave space for hamburger button */
+  .inv-header {
+    padding-top: 52px;
+  }
+
+  /* Toolbar wraps on mobile */
+  .inv-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .inv-toolbar-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .inv-search-input {
+    width: 100%;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .inv-search-wrap {
+    flex: 1;
+  }
 }
 
 @media (max-width: 480px) {
   .inv-stats-grid { grid-template-columns: 1fr; }
+  .inv-stat-value { font-size: 32px; }
+  .inv-table thead th:nth-child(n+3),
+  .inv-table tbody td:nth-child(n+3) { display: none; }
+  /* Ensure last row is visible above mobile browser bottom bar */
+  .inv-root { padding-bottom: 80px; }
 }
