@@ -473,12 +473,10 @@ export default function ContactPage() {
                       <div style={{ fontSize: 10, letterSpacing: "0.2em", color: "var(--dim)", textTransform: "uppercase", marginBottom: 8, fontWeight: 500 }}>Phone</div>
                       <div style={{ fontSize: 13, color: "var(--white)", lineHeight: 1.6, fontWeight: 300 }}>
                         <span style={{ color: "var(--mid)" }}>Sales:</span> +20 10 1234 5678<br />
-                        <span style={{ color: "var(--mid)" }}>Service:</span> 16500 
+                        <span style={{ color: "var(--mid)" }}>Service:</span> +20 11 2233 5566 
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
 
             <div style={{ display: "flex", gap: 20 }}>
               <div style={{ color: "var(--gold)", marginTop: 2 }}><EmailIcon /></div>
