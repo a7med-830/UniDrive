@@ -27,6 +27,8 @@ export async function GET() {
       topCars,
       soldThisMonth,
       soldLastMonth,
+      totalContactMessages,
+      recentContactMessages,
     ] = await Promise.all([
       // All cars for inventory breakdown
       prisma.car.findMany({
@@ -101,6 +103,13 @@ export async function GET() {
         },
         select: { price: true },
       }),
+
+      prisma.contactMessage.count(),
+
+      prisma.contactMessage.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 6,
+      }),
     ]);
 
     // Compute inventory stats from allCars
@@ -128,6 +137,10 @@ export async function GET() {
       inquiries: {
         total: totalInquiries,
         new:   newInquiries,
+      },
+      contactMessages: {
+        total: totalContactMessages,
+        recent: recentContactMessages,
       },
       appointments: {
         total:    totalAppointments,

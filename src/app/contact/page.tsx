@@ -2,6 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import {
+  CONTACT_BOOKING_TYPES,
+  getMinDateTimeLocal,
+  validateScheduledAt,
+  type ContactMethod,
+} from "@/lib/booking";
 
 // ─── SVG ICONS ────────────────────────────────────────────────────────────────
 const LocationIcon = () => (
@@ -100,6 +106,31 @@ function Footer() {
   );
 }
 
+type FormMode = "message" | "booking";
+
+const contactInputStyle: React.CSSProperties = {
+  width: "100%",
+  background: "var(--black)",
+  border: "1px solid var(--border2)",
+  color: "var(--white)",
+  fontFamily: "var(--sans)",
+  fontSize: 14,
+  padding: "14px 16px",
+  outline: "none",
+  letterSpacing: "0.04em",
+  transition: "border-color 0.3s, box-shadow 0.2s",
+};
+
+function focusInput(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
+  e.target.style.borderColor = "var(--white)";
+  e.target.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.08)";
+}
+
+function blurInput(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
+  e.target.style.borderColor = "var(--border2)";
+  e.target.style.boxShadow = "none";
+}
+
 // ─── Contact Form Component ───────────────────────────────────────────────────
 function ContactForm() {
   const [formData, setFormData] = useState({ name: "", email: "", phone: "", message: "" });
@@ -134,9 +165,9 @@ function ContactForm() {
           required
           value={formData.name}
           onChange={(e) => setFormData({...formData, name: e.target.value})}
-          style={{ width: "100%", background: "var(--black)", border: "1px solid var(--border2)", color: "var(--white)", fontFamily: "var(--sans)", fontSize: 14, padding: "14px 16px", outline: "none", letterSpacing: "0.04em", transition: "border-color 0.3s" }}
-          onFocus={(e) => e.target.style.borderColor = "var(--white)"}
-          onBlur={(e) => e.target.style.borderColor = "var(--border2)"}
+          style={contactInputStyle}
+          onFocus={focusInput}
+          onBlur={blurInput}
         />
       </div>
 
@@ -149,9 +180,9 @@ function ContactForm() {
             required
             value={formData.email}
             onChange={(e) => setFormData({...formData, email: e.target.value})}
-            style={{ width: "100%", background: "var(--black)", border: "1px solid var(--border2)", color: "var(--white)", fontFamily: "var(--sans)", fontSize: 14, padding: "14px 16px", outline: "none", letterSpacing: "0.04em", transition: "border-color 0.3s" }}
-            onFocus={(e) => e.target.style.borderColor = "var(--white)"}
-            onBlur={(e) => e.target.style.borderColor = "var(--border2)"}
+            style={contactInputStyle}
+            onFocus={focusInput}
+            onBlur={blurInput}
           />
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 8, minWidth: 0 }}>
@@ -161,9 +192,9 @@ function ContactForm() {
             id="phone" 
             value={formData.phone}
             onChange={(e) => setFormData({...formData, phone: e.target.value})}
-            style={{ width: "100%", background: "var(--black)", border: "1px solid var(--border2)", color: "var(--white)", fontFamily: "var(--sans)", fontSize: 14, padding: "14px 16px", outline: "none", letterSpacing: "0.04em", transition: "border-color 0.3s" }}
-            onFocus={(e) => e.target.style.borderColor = "var(--white)"}
-            onBlur={(e) => e.target.style.borderColor = "var(--border2)"}
+            style={contactInputStyle}
+            onFocus={focusInput}
+            onBlur={blurInput}
           />
         </div>
       </div>
@@ -176,9 +207,9 @@ function ContactForm() {
           required
           value={formData.message}
           onChange={(e) => setFormData({...formData, message: e.target.value})}
-          style={{ width: "100%", background: "var(--black)", border: "1px solid var(--border2)", color: "var(--white)", fontFamily: "var(--sans)", fontSize: 14, padding: "14px 16px", outline: "none", letterSpacing: "0.04em", resize: "vertical", transition: "border-color 0.3s" }}
-          onFocus={(e) => e.target.style.borderColor = "var(--white)"}
-          onBlur={(e) => e.target.style.borderColor = "var(--border2)"}
+          style={{ ...contactInputStyle, resize: "vertical" }}
+          onFocus={focusInput}
+          onBlur={blurInput}
         ></textarea>
       </div>
 
@@ -196,8 +227,179 @@ function ContactForm() {
   );
 }
 
+function BookingForm() {
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    message: "",
+    scheduledAt: "",
+    bookingType: "Service Appointment",
+    contactMethod: "Email" as ContactMethod,
+  });
+  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [scheduleError, setScheduleError] = useState<string | null>(null);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+    if (name === "scheduledAt") setScheduleError(null);
+  };
+
+  const handleScheduleBlur = () => {
+    if (form.scheduledAt) setScheduleError(validateScheduledAt(form.scheduledAt));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const timeErr = validateScheduledAt(form.scheduledAt);
+    if (timeErr) {
+      setScheduleError(timeErr);
+      return;
+    }
+    if (form.contactMethod === "Phone" && !form.phone.trim()) return;
+
+    setStatus("submitting");
+    try {
+      const res = await fetch("/api/appointments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientName: form.name,
+          clientEmail: form.email,
+          scheduledAt: new Date(form.scheduledAt).toISOString(),
+          status: "under reviewing",
+          bookingType: form.bookingType,
+          contactMethod: form.contactMethod,
+          notes: [
+            form.phone ? `Phone: ${form.phone}` : null,
+            form.message ? `Message: ${form.message}` : null,
+          ]
+            .filter(Boolean)
+            .join("\n"),
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(typeof data.error === "string" ? data.error : "Failed");
+      }
+      setStatus("success");
+      setForm({
+        name: "",
+        email: "",
+        phone: "",
+        message: "",
+        scheduledAt: "",
+        bookingType: "Service Appointment",
+        contactMethod: "Email",
+      });
+      setTimeout(() => setStatus("idle"), 6000);
+    } catch {
+      setStatus("error");
+      setTimeout(() => setStatus("idle"), 4000);
+    }
+  };
+
+  const labelStyle: React.CSSProperties = {
+    fontFamily: "var(--sans)",
+    fontSize: 10,
+    letterSpacing: "0.14em",
+    color: "var(--light)",
+    textTransform: "uppercase",
+  };
+
+  return (
+    <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <label htmlFor="bookingType" style={labelStyle}>Appointment Type</label>
+        <select
+          id="bookingType"
+          name="bookingType"
+          value={form.bookingType}
+          onChange={handleChange}
+          required
+          style={{ ...contactInputStyle, cursor: "pointer", colorScheme: "dark" }}
+          onFocus={focusInput}
+          onBlur={blurInput}
+        >
+          {CONTACT_BOOKING_TYPES.map((t) => (
+            <option key={t} value={t}>{t}</option>
+          ))}
+        </select>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <label htmlFor="bk-name" style={labelStyle}>Full Name</label>
+        <input id="bk-name" type="text" name="name" required value={form.name} onChange={handleChange} style={contactInputStyle} onFocus={focusInput} onBlur={blurInput} />
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <span style={labelStyle}>Preferred Contact</span>
+        <div style={{ display: "flex", gap: 24 }}>
+          {(["Email", "Phone"] as ContactMethod[]).map((method) => (
+            <label key={method} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--mid)", cursor: "pointer" }}>
+              <input type="radio" name="contactMethod" value={method} checked={form.contactMethod === method} onChange={handleChange} />
+              {method}
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, minWidth: 0 }} className="contact-form-row">
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, minWidth: 0 }}>
+          <label htmlFor="bk-email" style={labelStyle}>Email Address</label>
+          <input id="bk-email" type="email" name="email" required value={form.email} onChange={handleChange} style={contactInputStyle} onFocus={focusInput} onBlur={blurInput} />
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, minWidth: 0 }}>
+          <label htmlFor="bk-phone" style={labelStyle}>Phone {form.contactMethod === "Phone" ? "*" : ""}</label>
+          <input id="bk-phone" type="tel" name="phone" value={form.phone} onChange={handleChange} required={form.contactMethod === "Phone"} style={contactInputStyle} onFocus={focusInput} onBlur={blurInput} />
+        </div>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <label htmlFor="bk-scheduled" style={labelStyle}>Preferred Date & Time</label>
+        <input
+          id="bk-scheduled"
+          type="datetime-local"
+          name="scheduledAt"
+          required
+          value={form.scheduledAt}
+          onChange={handleChange}
+          onBlur={(e) => { blurInput(e); handleScheduleBlur(); }}
+          min={getMinDateTimeLocal()}
+          style={{ ...contactInputStyle, colorScheme: "dark" }}
+          onFocus={focusInput}
+        />
+        <p style={{ fontSize: 10, color: "var(--dim)", letterSpacing: "0.06em" }}>Mon–Sat · 9:00 AM – 6:00 PM</p>
+        {scheduleError && <p style={{ color: "#e05c5c", fontSize: 11, letterSpacing: "0.06em" }}>{scheduleError}</p>}
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <label htmlFor="bk-message" style={labelStyle}>Additional Notes</label>
+        <textarea id="bk-message" name="message" rows={4} value={form.message} onChange={handleChange} style={{ ...contactInputStyle, resize: "vertical" }} onFocus={focusInput} onBlur={blurInput} />
+      </div>
+
+      <button type="submit" className="m-btn-fill" style={{ alignSelf: "flex-start", marginTop: 8 }} disabled={status === "submitting" || !!scheduleError}>
+        {status === "submitting" ? "BOOKING..." : "BOOK APPOINTMENT"}
+      </button>
+
+      {status === "success" && (
+        <p style={{ color: "var(--gold)", fontSize: 12, letterSpacing: "0.08em", marginTop: 8 }}>
+          Your appointment request has been received. We&apos;ll confirm within 24 hours.
+        </p>
+      )}
+      {status === "error" && (
+        <p style={{ color: "#e05c5c", fontSize: 12, letterSpacing: "0.08em", marginTop: 8 }}>Could not book appointment. Please try again or call us.</p>
+      )}
+    </form>
+  );
+}
+
 // ─── Main Content ─────────────────────────────────────────────────────────────
 export default function ContactPage() {
+  const [formMode, setFormMode] = useState<FormMode>("message");
   return (
     <div style={{ background: "var(--black)", minHeight: "100vh", fontFamily: "var(--sans)", color: "var(--white)" }}>
       <Navbar />
@@ -239,6 +441,9 @@ export default function ContactPage() {
           @media (max-width: 600px) {
             .contact-grid {
               gap: 16px !important;
+            }
+            .contact-form-row {
+              grid-template-columns: 1fr !important;
             }
           }
         `}</style>
@@ -303,10 +508,36 @@ export default function ContactPage() {
           <div style={{ fontFamily: "var(--serif)", fontSize: 24, letterSpacing: "0.1em", color: "var(--white)", marginBottom: 12 }}>
             GET IN TOUCH
           </div>
-          <div style={{ fontSize: 11, color: "var(--mid)", letterSpacing: "0.08em", marginBottom: 36, fontWeight: 300, lineHeight: 1.7 }}>
-            Please fill out the form below with your details and specific inquiry. Our concierges aim to respond within 24 hours.
+          <div style={{ display: "flex", gap: 0, marginBottom: 28, border: "1px solid var(--border2)" }}>
+            {(["message", "booking"] as FormMode[]).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => setFormMode(mode)}
+                style={{
+                  flex: 1,
+                  padding: "12px 16px",
+                  fontFamily: "var(--sans)",
+                  fontSize: 10,
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  border: "none",
+                  cursor: "pointer",
+                  background: formMode === mode ? "var(--white)" : "transparent",
+                  color: formMode === mode ? "var(--black)" : "var(--mid)",
+                  transition: "background 0.2s, color 0.2s",
+                }}
+              >
+                {mode === "message" ? "Send Message" : "Book Appointment"}
+              </button>
+            ))}
           </div>
-          <ContactForm />
+          <div style={{ fontSize: 11, color: "var(--mid)", letterSpacing: "0.08em", marginBottom: 36, fontWeight: 300, lineHeight: 1.7 }}>
+            {formMode === "message"
+              ? "Please fill out the form below with your details and specific inquiry. Our concierges aim to respond within 24 hours."
+              : "Schedule a service visit, general consultation, or test drive inquiry. No vehicle selection required."}
+          </div>
+          {formMode === "message" ? <ContactForm /> : <BookingForm />}
         </div>
 
       </div>

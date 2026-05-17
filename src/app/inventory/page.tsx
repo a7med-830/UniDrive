@@ -174,7 +174,7 @@ function InventoryContent() {
       if (selectedBrands.length > 1) refined = refined.filter(c => selectedBrands.includes(c.make));
       if (selectedBodies.length  > 1) refined = refined.filter(c => selectedBodies.includes(c.body));
       if (selectedFuels.length   > 1) refined = refined.filter(c => selectedFuels.includes(c.fuelType));
-      if (selectedStatuses.length> 1) refined = refined.filter(c => selectedStatuses.includes(c.status));
+      if (selectedStatuses.length> 1) refined = refined.filter(c => c.status && selectedStatuses.includes(c.status));
       if (selectedYears.length   > 1) refined = refined.filter(c => selectedYears.includes(c.year));
       if (selectedColors.length)       refined = refined.filter(c => selectedColors.includes(c.color));
       if (selectedPrices.length  > 1) {

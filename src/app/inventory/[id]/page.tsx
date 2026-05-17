@@ -4,6 +4,12 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import type { Car } from "@/lib/cars";
+import {
+  INVENTORY_BOOKING_TYPES,
+  getMinDateTimeLocal,
+  validateScheduledAt,
+  type ContactMethod,
+} from "@/lib/booking";
 
 // ─── Navbar ───────────────────────────────────────────────────────────────────
 function Navbar() {
@@ -128,8 +134,18 @@ export default function CarDetailPage() {
 
   const [activeImage, setActiveImage] = useState(car?.images?.[0] ?? "");
   const [thumbnailIndex, setThumbnailIndex] = useState(0);
-  const [form, setForm]               = useState({ name: "", email: "", phone: "", message: "", scheduledAt: "" });
-  const [submitted, setSubmitted]     = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    message: "",
+    scheduledAt: "",
+    bookingType: "Test Drive",
+    contactMethod: "Email" as ContactMethod,
+  });
+  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [scheduleError, setScheduleError] = useState<string | null>(null);
   const [showOverlay, setShowOverlay] = useState(false);
   const [overlayImage, setOverlayImage] = useState("");
   const [overlayImageIndex, setOverlayImageIndex] = useState(0);
@@ -178,11 +194,32 @@ export default function CarDetailPage() {
     setShowOverlay(true);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+    if (name === "scheduledAt") setScheduleError(null);
+  };
 
-  const handleSubmit = async (e: React.FormEvent) => { 
-    e.preventDefault(); 
+  const handleScheduleBlur = () => {
+    if (form.scheduledAt) {
+      setScheduleError(validateScheduledAt(form.scheduledAt));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const timeErr = validateScheduledAt(form.scheduledAt);
+    if (timeErr) {
+      setScheduleError(timeErr);
+      return;
+    }
+    if (form.contactMethod === "Phone" && !form.phone.trim()) {
+      return;
+    }
+
+    setSubmitting(true);
     try {
       const res = await fetch("/api/appointments", {
         method: "POST",
@@ -193,28 +230,30 @@ export default function CarDetailPage() {
           clientEmail: form.email,
           scheduledAt: new Date(form.scheduledAt).toISOString(),
           status: "under reviewing",
-          notes: `Phone: ${form.phone}\nMessage: ${form.message}`
-        })
+          bookingType: form.bookingType,
+          contactMethod: form.contactMethod,
+          notes: [
+            form.phone ? `Phone: ${form.phone}` : null,
+            form.message ? `Message: ${form.message}` : null,
+          ]
+            .filter(Boolean)
+            .join("\n"),
+        }),
       });
       if (res.ok) {
         setSubmitted(true);
       } else {
-        alert("Failed to submit request.");
+        const data = await res.json().catch(() => ({}));
+        alert(typeof data.error === "string" ? data.error : "Failed to submit request.");
       }
     } catch (err) {
       console.error(err);
       alert("An error occurred.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  // ── Input style ──────────────────────────────────────────────────────────────
-  const inp: React.CSSProperties = {
-    width: "100%", background: "transparent",
-    border: "none", borderBottom: "1px solid rgba(255,255,255,0.15)",
-    color: "var(--white)", fontFamily: "var(--sans)", fontSize: 11,
-    padding: "10px 0", outline: "none", letterSpacing: "0.04em",
-    transition: "border-color 0.2s",
-  };
   const lbl: React.CSSProperties = {
     display: "block", fontSize: 8, letterSpacing: "0.22em",
     color: "var(--dim)", textTransform: "uppercase", marginBottom: 6, fontWeight: 500,
@@ -238,6 +277,43 @@ export default function CarDetailPage() {
 
   return (
     <div style={{ background: "var(--black)", minHeight: "100vh", fontFamily: "var(--sans)", color: "var(--white)" }}>
+      <style>{`
+        .enq-input, .enq-select, .enq-textarea {
+          width: 100%; background: transparent; border: none;
+          border-bottom: 1px solid rgba(255,255,255,0.15);
+          color: var(--white); font-family: var(--sans); font-size: 11px;
+          padding: 10px 0; outline: none; letter-spacing: 0.04em;
+          transition: border-color 0.2s;
+        }
+        .enq-input:hover, .enq-select:hover, .enq-textarea:hover {
+          border-bottom-color: rgba(255,255,255,0.28);
+        }
+        .enq-input:focus, .enq-select:focus, .enq-textarea:focus {
+          border-bottom-color: rgba(255,255,255,0.5);
+        }
+        .enq-select { cursor: pointer; color-scheme: dark; }
+        .enq-radio-group { display: flex; gap: 20px; margin-top: 4px; }
+        .enq-radio {
+          display: flex; align-items: center; gap: 8px;
+          font-size: 11px; color: var(--mid); letter-spacing: 0.06em; cursor: pointer;
+        }
+        .enq-radio:hover { color: var(--light); }
+        .enq-radio input { accent-color: var(--white); cursor: pointer; }
+        .enq-submit {
+          width: 100%; text-align: center; padding: 15px;
+          transition: opacity 0.2s, transform 0.15s;
+        }
+        .enq-submit:hover:not(:disabled) { opacity: 0.92; transform: translateY(-1px); }
+        .enq-submit:disabled { opacity: 0.45; cursor: not-allowed; }
+        .enq-success-icon {
+          width: 48px; height: 48px; margin: 0 auto 20px;
+          border: 1px solid rgba(255,255,255,0.2); border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 20px; color: var(--light);
+        }
+        .enq-error { font-size: 9px; color: #e05c5c; letter-spacing: 0.06em; margin-top: 6px; }
+        .enq-hint { font-size: 8px; color: var(--dim); letter-spacing: 0.06em; margin-top: 4px; }
+      `}</style>
       <Navbar />
 
       {activeImage && (
@@ -443,49 +519,66 @@ export default function CarDetailPage() {
 
               {submitted ? (
                 <div style={{ textAlign: "center", padding: "32px 0" }}>
+                  <div className="enq-success-icon">✓</div>
                   <p style={{ fontFamily: "var(--serif)", fontSize: 22, letterSpacing: "0.06em", marginBottom: 10 }}>REQUEST SENT</p>
+                  <p style={{ fontSize: 10, color: "var(--dim)", letterSpacing: "0.06em", lineHeight: 1.8, marginBottom: 8 }}>
+                    Thank you, <strong style={{ color: "var(--light)" }}>{form.name}</strong>.
+                  </p>
                   <p style={{ fontSize: 10, color: "var(--dim)", letterSpacing: "0.06em", lineHeight: 1.8, marginBottom: 24 }}>
-                    Thank you, <strong style={{ color: "var(--light)" }}>{form.name}</strong>.<br />
-                    We&apos;ll be in touch at {form.email} within 24 hours.
+                    Your <strong style={{ color: "var(--light)" }}>{form.bookingType}</strong> request is under review.
+                    {form.contactMethod === "Email"
+                      ? <> We&apos;ll reach you at {form.email}.</>
+                      : <> We&apos;ll call you at {form.phone}.</>}
                   </p>
                   <Link href="/inventory" className="m-btn" style={{ display: "block", textAlign: "center" }}>← ALL VEHICLES</Link>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 24 }}>
                   <div>
+                    <label style={lbl}>Booking Type *</label>
+                    <select name="bookingType" value={form.bookingType} onChange={handleChange} required className="enq-select">
+                      {INVENTORY_BOOKING_TYPES.map((t) => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
                     <label style={lbl}>Full Name *</label>
-                    <input type="text" name="name" value={form.name} onChange={handleChange} required placeholder="John Smith" style={inp}
-                      onFocus={e => (e.target as HTMLInputElement).style.borderBottomColor = "rgba(255,255,255,0.5)"}
-                      onBlur={e  => (e.target as HTMLInputElement).style.borderBottomColor = "rgba(255,255,255,0.15)"} />
+                    <input type="text" name="name" value={form.name} onChange={handleChange} required placeholder="John Smith" className="enq-input" />
+                  </div>
+                  <div>
+                    <label style={lbl}>Preferred Contact *</label>
+                    <div className="enq-radio-group">
+                      {(["Email", "Phone"] as ContactMethod[]).map((method) => (
+                        <label key={method} className="enq-radio">
+                          <input type="radio" name="contactMethod" value={method} checked={form.contactMethod === method} onChange={handleChange} />
+                          {method}
+                        </label>
+                      ))}
+                    </div>
                   </div>
                   <div>
                     <label style={lbl}>Email Address *</label>
-                    <input type="email" name="email" value={form.email} onChange={handleChange} required placeholder="john@example.com" style={inp}
-                      onFocus={e => (e.target as HTMLInputElement).style.borderBottomColor = "rgba(255,255,255,0.5)"}
-                      onBlur={e  => (e.target as HTMLInputElement).style.borderBottomColor = "rgba(255,255,255,0.15)"} />
+                    <input type="email" name="email" value={form.email} onChange={handleChange} required placeholder="john@example.com" className="enq-input" />
                   </div>
                   <div>
-                    <label style={lbl}>Phone</label>
-                    <input type="tel" name="phone" value={form.phone} onChange={handleChange} placeholder="+1 555 000 0000" style={inp}
-                      onFocus={e => (e.target as HTMLInputElement).style.borderBottomColor = "rgba(255,255,255,0.5)"}
-                      onBlur={e  => (e.target as HTMLInputElement).style.borderBottomColor = "rgba(255,255,255,0.15)"} />
+                    <label style={lbl}>Phone {form.contactMethod === "Phone" ? "*" : ""}</label>
+                    <input type="tel" name="phone" value={form.phone} onChange={handleChange} required={form.contactMethod === "Phone"} placeholder="+1 555 000 0000" className="enq-input" />
                   </div>
                   <div>
                     <label style={lbl}>Scheduled Date & Time *</label>
-                    <input type="datetime-local" name="scheduledAt" value={form.scheduledAt} onChange={handleChange} required style={{...inp, colorScheme: "dark"}}
-                      onFocus={e => (e.target as HTMLInputElement).style.borderBottomColor = "rgba(255,255,255,0.5)"}
-                      onBlur={e  => (e.target as HTMLInputElement).style.borderBottomColor = "rgba(255,255,255,0.15)"} />
+                    <input type="datetime-local" name="scheduledAt" value={form.scheduledAt} onChange={handleChange} onBlur={handleScheduleBlur} required min={getMinDateTimeLocal()} className="enq-input" style={{ colorScheme: "dark" }} />
+                    <p className="enq-hint">Mon–Sat · 9:00 AM – 6:00 PM</p>
+                    {scheduleError && <p className="enq-error">{scheduleError}</p>}
                   </div>
                   <div>
                     <label style={lbl}>Message</label>
                     <textarea name="message" rows={3} onChange={handleChange}
                       value={form.message || `Hi, I'm interested in the ${car.year} ${car.name} (${car.trim}). Please contact me to arrange a test drive.`}
-                      style={{ ...inp, resize: "none" }}
-                      onFocus={e => (e.target as HTMLTextAreaElement).style.borderBottomColor = "rgba(255,255,255,0.5)"}
-                      onBlur={e  => (e.target as HTMLTextAreaElement).style.borderBottomColor = "rgba(255,255,255,0.15)"} />
+                      className="enq-textarea" style={{ resize: "none" }} />
                   </div>
-                  <button type="submit" className="m-btn-fill" style={{ width: "100%", textAlign: "center", padding: "15px" }}>
-                    SEND ENQUIRY
+                  <button type="submit" className="m-btn-fill enq-submit" disabled={submitting || !!scheduleError}>
+                    {submitting ? "SENDING..." : "SEND ENQUIRY"}
                   </button>
                   <p style={{ fontSize: 8, color: "var(--dim)", textAlign: "center", letterSpacing: "0.08em", lineHeight: 1.8 }}>
                     BY SUBMITTING YOU AGREE TO BE CONTACTED BY OUR TEAM.

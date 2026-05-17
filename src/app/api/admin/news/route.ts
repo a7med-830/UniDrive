@@ -26,9 +26,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
+  const { status, ...fields } = parsed.data;
   const data = {
-    ...parsed.data,
-    publishedAt: parsed.data.status === "published" ? new Date() : null,
+    ...fields,
+    ...(status === "published" ? { publishedAt: new Date() } : {}),
   };
 
   try {

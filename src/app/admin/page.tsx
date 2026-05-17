@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import {
   Car as CarIcon, Users, Calendar, TrendingUp, TrendingDown,
   DollarSign, Package, Clock, CheckCircle, AlertCircle,
-  Search, MessageSquare, Bell, MoreHorizontal, RefreshCw,
+  Search, MessageSquare, Mail, Bell, MoreHorizontal, RefreshCw,
   ChevronLeft, ChevronRight, Zap, BarChart2, Wind, Thermometer, Wifi,
 } from "lucide-react";
 import "./dashboard.css";
@@ -13,6 +13,7 @@ import Link from "next/link";
 type Stats = {
   inventory: { total: number; available: number; reserved: number; sold: number; totalValue: number };
   inquiries: { total: number; new: number };
+  contactMessages: { total: number; recent: { id: number; name: string; email: string; phone: string | null; message: string; createdAt: string }[] };
   appointments: { total: number; pending: number; upcoming: { id: number; clientName: string; scheduledAt: string; status: string; car: { name: string; make: string; model: string; image: string | null } }[] };
   revenue: { thisMonth: number; lastMonth: number; growth: number; soldThisMonth: number };
   recentInquiries: { id: number; name: string; email: string; createdAt: string; status: string; car: { name: string; make: string; image: string | null } }[];
@@ -204,6 +205,7 @@ export default function AdminDashboard() {
           {[
             { icon: Package,      label: "Total Inventory", value: inv.total,                          sub: `${inv.available} available`,     color: "#b8965a" },
             { icon: Users,        label: "Inquiries",       value: stats!.inquiries.total,             sub: `${stats!.inquiries.new} unread`,  color: "#8b5cf6" },
+            { icon: Mail,         label: "Messages",      value: stats!.contactMessages.total,       sub: "from contact page",               color: "#f59e0b" },
             { icon: Calendar,     label: "Appointments",    value: stats!.appointments.total,          sub: `${stats!.appointments.pending} pending`, color: "#06b6d4" },
             { icon: CheckCircle,  label: "Sold",            value: inv.sold,                           sub: `${rev.soldThisMonth} this month`, color: "#22c55e" },
           ].map(k => {
@@ -284,7 +286,7 @@ export default function AdminDashboard() {
             <div className="dash-table-card-header">
               <div className="dash-table-card-titles">
                 <span className="dash-table-card-title">Recent Inquiries</span>
-                <span className="dash-table-card-sub">Latest customer interest &amp; messages</span>
+                <span className="dash-table-card-sub">Vehicle-specific inquiries from inventory</span>
               </div>
               <span className="dash-pct-badge" style={{ padding: "4px 10px", borderRadius: 50, fontSize: 11 }}>
                 {stats!.inquiries.new} new
@@ -334,6 +336,49 @@ export default function AdminDashboard() {
               </div>
             )}
           </div>
+        </div>
+
+        <div className="dash-table-card">
+          <div className="dash-table-card-header">
+            <div className="dash-table-card-titles">
+              <span className="dash-table-card-title">Contact Messages</span>
+              <span className="dash-table-card-sub">General messages from the contact page</span>
+            </div>
+            <Link href="/admin/messages" className="dash-view-all-btn" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
+              View All
+            </Link>
+          </div>
+          {stats!.contactMessages.recent.length === 0 ? (
+            <div style={{ padding: "32px 24px", textAlign: "center", color: "var(--d-muted)", fontSize: 13 }}>
+              No contact messages yet
+            </div>
+          ) : (
+            <div style={{ overflowX: "auto" }}>
+              <table className="dash-table">
+                <thead>
+                  <tr>
+                    <th>From</th>
+                    <th>Message</th>
+                    <th>Received</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stats!.contactMessages.recent.map((msg) => (
+                    <tr key={msg.id}>
+                      <td>
+                        <div className="dash-customer-name">{msg.name}</div>
+                        <div className="dash-customer-email">{msg.email}</div>
+                      </td>
+                      <td style={{ color: "var(--d-muted)", fontSize: 12, maxWidth: 320, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {msg.message}
+                      </td>
+                      <td style={{ color: "var(--d-muted)", fontSize: 11 }}>{timeAgo(msg.createdAt)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
         {/* ══ BOTTOM: Top Cars by Value ══ */}

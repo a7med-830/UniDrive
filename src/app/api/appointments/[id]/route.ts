@@ -31,9 +31,13 @@ export async function PUT(
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
     }
 
+    const { scheduledAt, ...rest } = parsed.data;
     const appointment = await prisma.appointment.update({
       where: { id: appointmentId },
-      data: parsed.data,
+      data: {
+        ...rest,
+        ...(scheduledAt ? { scheduledAt: new Date(scheduledAt) } : {}),
+      },
       include: {
         car: { select: { make: true, model: true, name: true } }
       }

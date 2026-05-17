@@ -1,0 +1,154 @@
+/* Appointment dashboard — status badges & detail panel */
+
+.appt-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.appt-badge--review {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.appt-badge--confirmed {
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.35);
+}
+
+.appt-badge--completed {
+  background: rgba(138, 138, 154, 0.15);
+  color: #a8a8b8;
+  border: 1px solid rgba(138, 138, 154, 0.35);
+}
+
+.appt-badge--cancelled {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.appt-row-clickable {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.appt-row-clickable:hover td {
+  background: rgba(184, 150, 90, 0.04);
+}
+
+.appt-detail-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 200;
+  display: flex;
+  justify-content: flex-end;
+  animation: apptFadeIn 0.2s ease;
+}
+
+.appt-detail-panel {
+  width: min(440px, 100vw);
+  height: 100%;
+  background: var(--inv-card);
+  border-left: 1px solid var(--inv-border);
+  display: flex;
+  flex-direction: column;
+  animation: apptSlideIn 0.25s ease;
+}
+
+.appt-detail-head {
+  padding: 24px 28px;
+  border-bottom: 1px solid var(--inv-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.appt-detail-body {
+  padding: 24px 28px;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.appt-detail-field label {
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--inv-dim);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.appt-detail-field p {
+  font-size: 14px;
+  color: var(--inv-text);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.appt-detail-actions {
+  padding: 20px 28px;
+  border-top: 1px solid var(--inv-border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.appt-quick-btn {
+  padding: 8px 14px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: 6px;
+  border: 1px solid var(--inv-border);
+  background: transparent;
+  color: var(--inv-text);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  font-family: var(--inv-sans);
+}
+
+.appt-quick-btn:hover {
+  border-color: var(--inv-gold);
+  color: var(--inv-gold);
+}
+
+.appt-quick-btn--primary {
+  background: var(--inv-gold);
+  border-color: var(--inv-gold);
+  color: #000;
+}
+
+.appt-quick-btn--primary:hover {
+  background: #c9a86a;
+  border-color: #c9a86a;
+  color: #000;
+}
+
+.appt-quick-btn--danger:hover {
+  border-color: var(--inv-red);
+  color: var(--inv-red);
+}
+
+@keyframes apptFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes apptSlideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}

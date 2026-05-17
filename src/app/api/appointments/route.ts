@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { validateScheduledAt } from "@/lib/booking";
 import { z } from "zod";
 
 const appointmentSchema = z.object({
-  carId:       z.number().int().positive(),
+  carId:       z.number().int().positive().optional().nullable(),
   clientName:  z.string().min(1),
   clientEmail: z.string().email().optional().or(z.literal('')),
   scheduledAt: z.string().datetime(), // expects ISO string
   notes:       z.string().optional(),
+  bookingType: z.string().optional(),
+  contactMethod: z.string().optional(),
   status:      z.enum(["under reviewing", "confirmed", "completed", "cancelled"]).default("under reviewing"),
 });
 
@@ -42,10 +45,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
     }
 
+    const scheduledAt = new Date(parsed.data.scheduledAt);
+    const scheduleError = validateScheduledAt(scheduledAt);
+    if (scheduleError) {
+      return NextResponse.json({ error: scheduleError }, { status: 400 });
+    }
+
     const appointment = await prisma.appointment.create({ 
       data: {
-        ...parsed.data,
+        carId: parsed.data.carId ?? null,
+        clientName: parsed.data.clientName,
         clientEmail: parsed.data.clientEmail || null,
+        scheduledAt,
+        status: parsed.data.status,
+        bookingType: parsed.data.bookingType ?? null,
+        contactMethod: parsed.data.contactMethod ?? null,
+        notes: parsed.data.notes ?? null,
       } 
     });
     return NextResponse.json(appointment, { status: 201 });

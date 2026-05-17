@@ -60,15 +60,17 @@ model ContactMessage {
 }
 
 model Appointment {
-  id          Int      @id @default(autoincrement())
-  carId       Int
-  car         Car      @relation(fields: [carId], references: [id])
-  clientName  String
-  clientEmail String?
-  scheduledAt DateTime
-  status      String   @default("pending")
-  notes       String?
-  createdAt   DateTime @default(now())
+  id            Int      @id @default(autoincrement())
+  carId         Int?
+  car           Car?     @relation(fields: [carId], references: [id])
+  clientName    String
+  clientEmail   String?
+  scheduledAt   DateTime
+  status        String   @default("pending")
+  bookingType   String?
+  contactMethod String?
+  notes         String?
+  createdAt     DateTime @default(now())
 }
 
 model NewsArticle {
