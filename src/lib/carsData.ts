@@ -35,7 +35,7 @@ export const allCars: Car[] = [
       "/top 4 cars/images/rolls/6F.jpg",
     ],
     features: [
-      "Full Carbon Fibre Body Kit",
+      "Full Carbon Fiber Body Kit",
       "Bespoke Hand-Stitched Leather Interior",
       "Starlight Headliner — 1,340 Fibre Optics",
       "Forged 24″ Monoblock Alloy Wheels",
