@@ -320,10 +320,6 @@ body {
     padding: 40px 24px !important;
   }
   
-  .details-grid {
-    grid-template-columns: 1fr !important;
-    gap: 40px !important;
-  }
   
   .footer-container {
     padding: 40px 24px 24px !important;
@@ -357,6 +353,11 @@ body {
   
   .details-content {
     padding: 32px 16px !important;
+  }
+  
+  .details-grid {
+    grid-template-columns: 1fr !important;
+    gap: 40px !important;
   }
   
   .footer-container {

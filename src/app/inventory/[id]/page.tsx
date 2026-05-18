@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import "../../page-styles.css";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import type { Car } from "@/lib/cars";
@@ -511,7 +512,7 @@ export default function CarDetailPage() {
 
           {/* RIGHT: Enquiry panel */}
           <div>
-            <div style={{ position: "sticky", top: 88, border: "1px solid var(--border)", padding: "36px 28px" }}>
+            <div style={{ position: "sticky", top: 88, border: "1px solid var(--border)", padding: "36px 28px", maxHeight: "calc(100vh - 120px)", overflowY: "auto" }}>
               <p style={{ fontFamily: "var(--serif)", fontSize: 20, letterSpacing: "0.08em", fontWeight: 400, marginBottom: 6 }}>ENQUIRE</p>
               <p style={{ fontSize: 10, color: "var(--dim)", letterSpacing: "0.08em", marginBottom: 28, lineHeight: 1.8, fontWeight: 300 }}>
                 Book a test drive or request more information about this vehicle.
